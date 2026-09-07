@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>OnlyChat</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Quicksand:wght@500;600;700&family=Kalam:wght@400;700&family=Caveat:wght@500;600;700&family=Patrick+Hand&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg-deep:#0d0e26;
@@ -20,6 +20,45 @@
     --line:#2a2c5e;
     --danger:#ff5c72;
   }
+  /* ===== chat themes: each theme only recolors accents + restyles the
+     chat thread background & message bubbles, so the rest of the app
+     (login, list, settings) always stays readable. ===== */
+  body[data-theme="sunset"]{--violet:#a855f7;--violet-soft:#c084fc;--mint:#38bdf8;--coral:#fb7185;}
+  body[data-theme="sunset"] #chatScreen{background:linear-gradient(180deg,#2b1055 0%,#611b6b 45%,#c74b6b 78%,#f2994a 100%);}
+  body[data-theme="sunset"] .bubble{backdrop-filter:blur(6px);box-shadow:0 4px 18px rgba(0,0,0,.25);}
+  body[data-theme="sunset"] .bubbleRow.me .bubble{background:rgba(255,255,255,.16)!important;border:1.5px solid rgba(255,255,255,.4);color:#fff;}
+  body[data-theme="sunset"] .bubbleRow.them .bubble{background:rgba(15,8,30,.4)!important;border:1.5px solid rgba(255,255,255,.22);}
+
+  body[data-theme="comic"]{--violet:#ff5da2;--violet-soft:#ff8ac0;--mint:#2ee6a6;--coral:#ffd166;}
+  body[data-theme="comic"] #chatScreen{background:#151515;}
+  body[data-theme="comic"] .bubble{font-family:'Poppins',sans-serif;font-weight:700;border:2.5px solid #111!important;box-shadow:3px 3px 0 #111;}
+  body[data-theme="comic"] .bubbleRow.me .bubble{background:#ffe98a!important;color:#171717!important;border-radius:16px 16px 4px 16px!important;box-shadow:-3px 3px 0 #111;}
+  body[data-theme="comic"] .bubbleRow.them .bubble{background:#9ee6ff!important;color:#171717!important;border-radius:16px 16px 16px 4px!important;}
+
+  body[data-theme="handwritten"]{--violet:#c2703d;--violet-soft:#dd9a68;--mint:#7fae6a;--coral:#d16b6b;}
+  body[data-theme="handwritten"] #chatScreen{background:#211a10;}
+  body[data-theme="handwritten"] .bubble{font-family:'Kalam',cursive;font-size:16.5px;border-radius:6px!important;box-shadow:0 3px 8px rgba(0,0,0,.35);}
+  body[data-theme="handwritten"] .bubbleRow.me .bubble{background:#f6e7c1!important;color:#3a2c14!important;transform:rotate(-1deg);}
+  body[data-theme="handwritten"] .bubbleRow.them .bubble{background:#e9f1e4!important;color:#2c3a1e!important;transform:rotate(1deg);}
+
+  body[data-theme="character"]{--violet:#8b5cf6;--violet-soft:#a78bfa;--mint:#22d3ee;--coral:#f472b6;}
+  body[data-theme="character"] #chatScreen{background:radial-gradient(circle at 30% 10%,#3a2360 0%,#160e2e 62%);}
+  body[data-theme="character"] .bubbleRow.me .bubble{background:linear-gradient(135deg,#8b5cf6,#f472b6)!important;}
+  body[data-theme="character"] .bubbleRow.them .bubble{background:rgba(255,255,255,.09)!important;backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.16);}
+
+  body[data-theme="doodle"]{--violet:#ffd23f;--violet-soft:#ffe28a;--mint:#3fd6b0;--coral:#ff6f91;}
+  body[data-theme="doodle"] #chatScreen{background:#0b0b12;}
+  body[data-theme="doodle"] .bubble{border:2px dashed currentColor!important;border-radius:20px 4px 20px 4px!important;background:transparent!important;}
+  body[data-theme="doodle"] .bubbleRow.me .bubble{color:#ffd23f!important;}
+  body[data-theme="doodle"] .bubbleRow.them .bubble{color:#3fd6b0!important;}
+
+  body[data-theme="mystery"]{--violet:#8a8a8a;--violet-soft:#b0b0b0;--mint:#9d9d9d;--coral:#c74b4b;}
+  body[data-theme="mystery"] #chatScreen{background:#000;}
+  body[data-theme="mystery"] .bubble{background:#111!important;border:1px solid #333!important;font-family:'Kalam',cursive;}
+  body[data-theme="mystery"] .bubbleRow.them .bubble{color:#ccc!important;}
+  body[data-theme="mystery"] .bubbleRow.me .bubble{color:#eee!important;border-color:#c74b4b!important;}
+
+  .bubble.hw-text{line-height:1.5;}
   *{box-sizing:border-box;}
   html,body{height:100%;margin:0;}
   body{
@@ -153,6 +192,49 @@
   .logoutBtn{width:100%;padding:12px;border-radius:12px;border:1px solid var(--danger);
     background:transparent;color:var(--danger);font-weight:600;cursor:pointer;}
 
+  /* ---------- settings: theme swatches ---------- */
+  .themeGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+  .themeCard{border-radius:14px;padding:10px 6px;text-align:center;cursor:pointer;
+    border:2px solid var(--line);background:#0f1130;}
+  .themeCard.selected{border-color:var(--violet-soft);}
+  .themeSwatch{height:34px;border-radius:8px;margin-bottom:6px;}
+  .themeCard span{font-size:11px;color:var(--text-lo);}
+  .themeCard.selected span{color:var(--text-hi);font-weight:600;}
+
+  /* ---------- settings: toggle switch ---------- */
+  .toggleRow{display:flex;align-items:center;justify-content:space-between;padding:8px 0;}
+  .toggleRow .lbl{font-size:14px;}
+  .switch{position:relative;width:44px;height:25px;flex-shrink:0;}
+  .switch input{opacity:0;width:0;height:0;}
+  .slider{position:absolute;inset:0;background:var(--line);border-radius:999px;cursor:pointer;transition:.15s;}
+  .slider::before{content:'';position:absolute;width:19px;height:19px;left:3px;top:3px;
+    background:#fff;border-radius:50%;transition:.15s;}
+  .switch input:checked + .slider{background:var(--violet);}
+  .switch input:checked + .slider::before{transform:translateX(19px);}
+  .selectField{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line);
+    background:#0f1130;color:var(--text-hi);font-size:13.5px;font-family:'Quicksand',sans-serif;margin-top:8px;}
+
+  /* ---------- composer extra toggle icons ---------- */
+  .roundBtn.mini{background:var(--bg-panel);color:var(--text-lo);border:1px solid var(--line);}
+  .roundBtn.mini.on{background:var(--violet);color:#fff;border-color:var(--violet);}
+
+  /* ---------- custom on-screen keyboard ---------- */
+  #customKeyboard{display:none;border-top:1px solid var(--line);background:var(--bg-panel);
+    padding:8px 10px 10px;flex-shrink:0;max-height:38vh;overflow-y:auto;}
+  #customKeyboard.show{display:block;}
+  .kbTopRow{display:flex;gap:8px;margin-bottom:8px;}
+  .kbLangBtn{flex:1;padding:7px 0;border-radius:10px;border:1px solid var(--line);
+    background:transparent;color:var(--text-lo);font-size:12.5px;font-weight:600;cursor:pointer;}
+  .kbLangBtn.active{background:var(--violet);border-color:var(--violet);color:#fff;}
+  .kbGuide{font-size:10.5px;color:var(--text-lo);margin:8px 2px 4px;letter-spacing:.3px;}
+  .kbRow{display:flex;flex-wrap:wrap;gap:5px;}
+  .kbKey{min-width:28px;height:32px;padding:0 6px;border-radius:8px;border:1px solid var(--line);
+    background:#0f1130;color:var(--text-hi);font-size:14px;display:flex;align-items:center;
+    justify-content:center;cursor:pointer;font-family:'Quicksand',sans-serif;}
+  .kbKey.hi{font-family:'Noto Sans Devanagari',sans-serif;font-size:15px;}
+  .kbKey.wide{min-width:64px;font-size:12px;font-weight:600;color:var(--text-lo);}
+  .kbKey:active{background:var(--violet);color:#fff;}
+
   /* ---------- new chat modal ---------- */
   .modalOverlay{position:fixed;inset:0;background:rgba(6,7,20,.6);display:flex;
     align-items:flex-end;z-index:50;opacity:0;pointer-events:none;transition:opacity .15s;}
@@ -235,9 +317,16 @@
       </div>
     </div>
     <div class="msgs" id="msgsWrap"></div>
+    <div id="customKeyboard"></div>
     <div class="composer" id="composerWrap">
       <button class="roundBtn attach" id="attachBtn">
         <svg viewBox="0 0 24 24"><path d="M16.5 6.5v9a4.5 4.5 0 01-9 0v-10a3 3 0 016 0v9a1.5 1.5 0 01-3 0v-8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+      <button class="roundBtn mini" id="hwToggleBtn" style="display:none;" title="Send as handwriting">
+        <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 000-1.41l-2.34-2.34a1 1 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="currentColor"/></svg>
+      </button>
+      <button class="roundBtn mini" id="kbToggleBtn" style="display:none;" title="Custom keyboard">
+        <svg viewBox="0 0 24 24"><path d="M4 5h16a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V6a1 1 0 011-1zm1 3v2h2V8H5zm4 0v2h2V8H9zm4 0v2h2V8h-2zm4 0v2h2V8h-2zM5 12v2h2v-2H5zm4 0v2h6v-2H9zm8 0v2h2v-2h-2z" fill="currentColor"/></svg>
       </button>
       <input type="file" id="fileInput" accept="image/*" style="display:none;">
       <textarea id="msgInput" rows="1" placeholder="Type a message…"></textarea>
@@ -260,6 +349,36 @@
         <label class="radioRow"><input type="radio" name="privacy" value="everyone"> Everyone</label>
         <label class="radioRow"><input type="radio" name="privacy" value="contacts"> Only people I already know</label>
       </div>
+
+      <div class="settingsCard">
+        <h3>Chat theme</h3>
+        <p>Pick how your chat screen and message bubbles look.</p>
+        <div class="themeGrid" id="themeGrid"></div>
+      </div>
+
+      <div class="settingsCard">
+        <h3>Handwriting mode</h3>
+        <p>Turn this on to get a pen icon in chat — tap it before sending and your normally-typed message goes out looking handwritten.</p>
+        <div class="toggleRow">
+          <span class="lbl">Enable handwriting mode</span>
+          <label class="switch"><input type="checkbox" id="hwEnabledToggle"><span class="slider"></span></label>
+        </div>
+        <select class="selectField" id="hwFontSelect">
+          <option value="Kalam">Kalam (English + Hindi)</option>
+          <option value="Caveat">Caveat (English)</option>
+          <option value="Patrick Hand">Patrick Hand (English)</option>
+        </select>
+      </div>
+
+      <div class="settingsCard">
+        <h3>Custom keyboard</h3>
+        <p>Adds an on-screen A–Z / Hindi key panel in chat, so you can type by tapping letters instead of your phone's keyboard.</p>
+        <div class="toggleRow">
+          <span class="lbl">Enable custom keyboard</span>
+          <label class="switch"><input type="checkbox" id="kbEnabledToggle"><span class="slider"></span></label>
+        </div>
+      </div>
+
       <button class="logoutBtn" id="logoutBtn">Log out</button>
     </div>
   </div>
@@ -297,7 +416,7 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
-auth.setPersistence(firebase.auth.Auth.Persistence.NONE).catch(()=>{});
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(()=>{});
 const db = firebase.firestore();
 const FAKE_DOMAIN = "onlychat.local";
 
@@ -326,6 +445,185 @@ function fmtTime(ms){
   return d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
 }
 function validUsername(u){ return /^[a-zA-Z0-9_]{3,20}$/.test(u); }
+
+/* ---------------- chat theme, handwriting & custom keyboard prefs ---------------- */
+const THEMES = [
+  { id:'default',     label:'Classic',    c1:'#7c5cff', c2:'#3fd6b0' },
+  { id:'sunset',       label:'Sunset Bubble', c1:'#a855f7', c2:'#f2994a' },
+  { id:'comic',        label:'Comic Strip',   c1:'#ff5da2', c2:'#ffe98a' },
+  { id:'handwritten',  label:'Handwritten',   c1:'#c2703d', c2:'#f6e7c1' },
+  { id:'character',    label:'Dreamy',        c1:'#8b5cf6', c2:'#f472b6' },
+  { id:'doodle',       label:'Neon Doodle',   c1:'#ffd23f', c2:'#3fd6b0' },
+  { id:'mystery',      label:'Secret',        c1:'#c74b4b', c2:'#8a8a8a' }
+];
+function getPref(key, fallback){
+  const v = localStorage.getItem(key);
+  return v === null ? fallback : v;
+}
+function applyTheme(id){
+  if(id === 'default') document.body.removeAttribute('data-theme');
+  else document.body.setAttribute('data-theme', id);
+  localStorage.setItem('oc_theme', id);
+}
+function renderThemeGrid(){
+  const grid = $('themeGrid');
+  const current = getPref('oc_theme', 'default');
+  grid.innerHTML = '';
+  THEMES.forEach(t=>{
+    const card = document.createElement('div');
+    card.className = 'themeCard' + (t.id === current ? ' selected' : '');
+    card.innerHTML = `<div class="themeSwatch" style="background:linear-gradient(135deg,${t.c1},${t.c2})"></div><span>${t.label}</span>`;
+    card.onclick = ()=>{
+      applyTheme(t.id);
+      grid.querySelectorAll('.themeCard').forEach(c=>c.classList.remove('selected'));
+      card.classList.add('selected');
+      toast('Theme set to ' + t.label + '.');
+    };
+    grid.appendChild(card);
+  });
+}
+let hwEnabled = getPref('oc_hw_enabled','0') === '1';
+let hwFont = getPref('oc_hw_font','Kalam');
+let hwActive = false; // per-message toggle, resets after sending
+let kbEnabled = getPref('oc_kb_enabled','0') === '1';
+
+function refreshComposerToggles(){
+  $('hwToggleBtn').style.display = hwEnabled ? 'flex' : 'none';
+  $('kbToggleBtn').style.display = kbEnabled ? 'flex' : 'none';
+  if(!hwEnabled){ hwActive = false; $('hwToggleBtn').classList.remove('on'); }
+  if(!kbEnabled){ $('customKeyboard').classList.remove('show'); }
+}
+
+$('hwEnabledToggle').addEventListener('change', function(){
+  hwEnabled = this.checked;
+  localStorage.setItem('oc_hw_enabled', hwEnabled ? '1' : '0');
+  refreshComposerToggles();
+});
+$('hwFontSelect').addEventListener('change', function(){
+  hwFont = this.value;
+  localStorage.setItem('oc_hw_font', hwFont);
+});
+$('kbEnabledToggle').addEventListener('change', function(){
+  kbEnabled = this.checked;
+  localStorage.setItem('oc_kb_enabled', kbEnabled ? '1' : '0');
+  refreshComposerToggles();
+});
+
+$('hwToggleBtn').onclick = function(){
+  hwActive = !hwActive;
+  this.classList.toggle('on', hwActive);
+  toast(hwActive ? 'This message will send as handwriting.' : 'Handwriting off for this message.');
+};
+
+/* ---------------- custom on-screen keyboard ---------------- */
+const HI_VOWELS = ['अ','आ','इ','ई','उ','ऊ','ऋ','ए','ऐ','ओ','औ','अं','अः'];
+const HI_CONSONANTS = ['क','ख','ग','घ','ङ','च','छ','ज','झ','ञ','ट','ठ','ड','ढ','ण','त','थ','द','ध','न','प','फ','ब','भ','म','य','र','ल','व','श','ष','स','ह'];
+const HI_MATRAS = ['ा','ि','ी','ु','ू','े','ै','ो','ौ','ं','ः','्'];
+let kbLang = 'en';
+let kbShift = false;
+
+function insertAtCursor(text){
+  const el = $('msgInput');
+  const start = el.selectionStart, end = el.selectionEnd;
+  el.value = el.value.slice(0,start) + text + el.value.slice(end);
+  const pos = start + text.length;
+  el.selectionStart = el.selectionEnd = pos;
+  el.focus();
+  el.dispatchEvent(new Event('input'));
+}
+function kbKey(label, cls, onTap){
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'kbKey ' + (cls||'');
+  b.textContent = label;
+  b.onclick = onTap;
+  return b;
+}
+function buildKeyboard(){
+  const box = $('customKeyboard');
+  box.innerHTML = '';
+
+  const topRow = document.createElement('div'); topRow.className = 'kbTopRow';
+  const enBtn = document.createElement('button'); enBtn.className = 'kbLangBtn' + (kbLang==='en'?' active':''); enBtn.textContent = 'English';
+  const hiBtn = document.createElement('button'); hiBtn.className = 'kbLangBtn' + (kbLang==='hi'?' active':''); hiBtn.textContent = 'हिन्दी';
+  enBtn.onclick = ()=>{ kbLang='en'; buildKeyboard(); };
+  hiBtn.onclick = ()=>{ kbLang='hi'; buildKeyboard(); };
+  topRow.appendChild(enBtn); topRow.appendChild(hiBtn);
+  box.appendChild(topRow);
+
+  if(kbLang === 'en'){
+    const guide1 = document.createElement('div'); guide1.className='kbGuide';
+    guide1.textContent = kbShift ? 'Type: A B C D … (capital)' : 'Type: a b c d … (small)';
+    box.appendChild(guide1);
+    const row1 = document.createElement('div'); row1.className = 'kbRow';
+    for(let i=0;i<26;i++){
+      const ch = String.fromCharCode(97+i);
+      const shown = kbShift ? ch.toUpperCase() : ch;
+      row1.appendChild(kbKey(shown, '', ()=> insertAtCursor(shown)));
+    }
+    box.appendChild(row1);
+
+    const guide2 = document.createElement('div'); guide2.className='kbGuide'; guide2.textContent = 'Numbers & punctuation';
+    box.appendChild(guide2);
+    const row2 = document.createElement('div'); row2.className = 'kbRow';
+    '0123456789'.split('').forEach(ch=> row2.appendChild(kbKey(ch,'',()=>insertAtCursor(ch))));
+    ['.',',','!','?',"'",'"','-','@'].forEach(ch=> row2.appendChild(kbKey(ch,'',()=>insertAtCursor(ch))));
+    box.appendChild(row2);
+
+    const row3 = document.createElement('div'); row3.className = 'kbRow'; row3.style.marginTop='6px';
+    row3.appendChild(kbKey(kbShift ? 'abc' : 'ABC', 'wide', ()=>{ kbShift=!kbShift; buildKeyboard(); }));
+    row3.appendChild(kbKey('Space', 'wide', ()=> insertAtCursor(' ')));
+    row3.appendChild(kbKey('⌫', 'wide', ()=>{
+      const el=$('msgInput'); const start=el.selectionStart, end=el.selectionEnd;
+      if(start===end && start>0){ el.value = el.value.slice(0,start-1)+el.value.slice(end); el.selectionStart=el.selectionEnd=start-1; }
+      else { el.value = el.value.slice(0,start)+el.value.slice(end); el.selectionStart=el.selectionEnd=start; }
+      el.focus(); el.dispatchEvent(new Event('input'));
+    }));
+    box.appendChild(row3);
+  } else {
+    const g1 = document.createElement('div'); g1.className='kbGuide'; g1.textContent='हिन्दी स्वर (vowels)';
+    box.appendChild(g1);
+    const r1 = document.createElement('div'); r1.className='kbRow';
+    HI_VOWELS.forEach(ch=> r1.appendChild(kbKey(ch,'hi',()=>insertAtCursor(ch))));
+    box.appendChild(r1);
+
+    const g2 = document.createElement('div'); g2.className='kbGuide'; g2.textContent='हिन्दी व्यंजन (consonants)';
+    box.appendChild(g2);
+    const r2 = document.createElement('div'); r2.className='kbRow';
+    HI_CONSONANTS.forEach(ch=> r2.appendChild(kbKey(ch,'hi',()=>insertAtCursor(ch))));
+    box.appendChild(r2);
+
+    const g3 = document.createElement('div'); g3.className='kbGuide'; g3.textContent='मात्राएँ (append after a consonant)';
+    box.appendChild(g3);
+    const r3 = document.createElement('div'); r3.className='kbRow';
+    HI_MATRAS.forEach(ch=> r3.appendChild(kbKey(ch,'hi',()=>insertAtCursor(ch))));
+    box.appendChild(r3);
+
+    const row4 = document.createElement('div'); row4.className = 'kbRow'; row4.style.marginTop='6px';
+    row4.appendChild(kbKey('Space', 'wide', ()=> insertAtCursor(' ')));
+    row4.appendChild(kbKey('⌫', 'wide', ()=>{
+      const el=$('msgInput'); const start=el.selectionStart, end=el.selectionEnd;
+      if(start===end && start>0){ el.value = el.value.slice(0,start-1)+el.value.slice(end); el.selectionStart=el.selectionEnd=start-1; }
+      else { el.value = el.value.slice(0,start)+el.value.slice(end); el.selectionStart=el.selectionEnd=start; }
+      el.focus(); el.dispatchEvent(new Event('input'));
+    }));
+    box.appendChild(row4);
+  }
+}
+$('kbToggleBtn').onclick = function(){
+  const box = $('customKeyboard');
+  const showing = box.classList.toggle('show');
+  this.classList.toggle('on', showing);
+  if(showing) buildKeyboard();
+};
+
+/* apply saved theme/prefs immediately, even before login */
+applyTheme(getPref('oc_theme','default'));
+$('hwFontSelect').value = hwFont;
+$('hwEnabledToggle').checked = hwEnabled;
+$('kbEnabledToggle').checked = kbEnabled;
+renderThemeGrid();
+refreshComposerToggles();
 
 let me = null;           // firebase auth user
 let myProfile = null;    // {username, privacy, contacts, blocked}
@@ -460,7 +758,12 @@ $('backFromRequests').onclick = ()=>{
 };
 $('openSettings').onclick = ()=> showScreen('settingsScreen');
 $('backFromSettings').onclick = ()=> showScreen('chatListScreen');
-$('backFromChat').onclick = ()=>{ if(threadUnsub) threadUnsub(); showScreen('chatListScreen'); };
+$('backFromChat').onclick = ()=>{
+  if(threadUnsub) threadUnsub();
+  $('customKeyboard').classList.remove('show');
+  $('kbToggleBtn').classList.remove('on');
+  showScreen('chatListScreen');
+};
 
 /* ---------------- chat list (accepted chats) ---------------- */
 function listenChatList(){
@@ -600,6 +903,8 @@ $('newChatGo').onclick = async ()=>{
 /* ---------------- chat thread ---------------- */
 function openChat(chatId, otherUid, otherName){
   activeChatId = chatId; activeOtherUid = otherUid; activeOtherName = otherName;
+  hwActive = false; $('hwToggleBtn').classList.remove('on');
+  $('customKeyboard').classList.remove('show'); $('kbToggleBtn').classList.remove('on');
   $('threadName').textContent = otherName;
   $('threadAvatar').textContent = initialsAvatar(otherName);
   $('threadStatus').textContent = '';
@@ -628,6 +933,9 @@ function openChat(chatId, otherUid, otherName){
         row.className = 'bubbleRow ' + (m.from === me.uid ? 'me' : 'them');
         let inner = '';
         if(m.type === 'image'){ inner = `<img src="${m.imageData}">`; }
+        else if(m.style === 'handwriting'){
+          inner = `<span class="hw-text" style="font-family:'${m.font||'Kalam'}',cursive;font-size:18px;">${escapeHtml(m.text)}</span>`;
+        }
         else { inner = escapeHtml(m.text); }
         row.innerHTML = `<div class="bubble">${inner}<span class="stamp">${fmtTime(m.time)}</span></div>`;
         wrap.appendChild(row);
@@ -653,7 +961,10 @@ $('sendBtn').onclick = async ()=>{
   const text = box.value.trim();
   if(!text) return;
   box.value = '';
-  await sendMessage({ type: 'text', text });
+  const payload = { type: 'text', text };
+  if(hwEnabled && hwActive){ payload.style = 'handwriting'; payload.font = hwFont; }
+  await sendMessage(payload);
+  if(hwActive){ hwActive = false; $('hwToggleBtn').classList.remove('on'); }
 };
 $('msgInput').addEventListener('keydown', e=>{
   if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); $('sendBtn').click(); }
