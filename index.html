@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>OnlyChat</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Quicksand:wght@500;600;700&family=Kalam:wght@400;700&family=Caveat:wght@500;600;700&family=Patrick+Hand&family=Comic+Neue:wght@400;700&family=Gloria+Hallelujah&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Quicksand:wght@500;600;700&family=Kalam:wght@400;700&family=Caveat:wght@500;600;700&family=Patrick+Hand&family=Comic+Neue:wght@400;700&family=Gloria+Hallelujah&family=Bangers&family=Permanent+Marker&family=Special+Elite&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg-deep:#0d0e26;
@@ -23,14 +23,27 @@
   /* ===== chat themes: each theme restyles the chat thread's background,
      fonts, bubble shapes AND adds decorative layers (patterns/textures),
      while login/list/settings stay on the safe base palette. ===== */
-  /* ===== 1. Floating Bubble — glowing hand-drawn speech bubbles float
-     over a night-sunset backdrop with a boy+cat silhouette resting at
-     the bottom, matching image #1. ===== */
+  /* ===== shared: decorative background-art layer. Each theme's SVG/
+     doodle set lives inside #chatScreen but outside the message list,
+     so it never interferes with the Firebase-driven message markup —
+     hidden by default, only the active theme's pieces switch on. ===== */
+  .themeArt{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;}
+  .themeArt svg, .art-handwritten, .art-doodle{display:none;}
+  .themeArt .art-bubble, .themeArt .art-character, .themeArt .art-story{
+    position:absolute;left:0;right:0;bottom:0;width:100%;height:100%;}
+  .hw-doodle, .dd-doodle{position:absolute;width:38px;height:38px;opacity:.16;}
+  .hw-star{top:8%;right:8%;} .hw-flower{bottom:30%;left:6%;transform:rotate(-8deg);}
+  .hw-swirl{top:38%;left:82%;width:30px;height:30px;}
+  .dd-stick{top:14%;left:8%;width:34px;height:52px;opacity:.35;}
+
+  /* ===== 1. Floating Bubble — twilight skyline + boy&cat silhouette,
+     glowing hand-drawn capsule bubbles with chalk doodles, image #1. ===== */
   body[data-theme="bubble"]{--violet:#a855f7;--violet-soft:#c9a3ff;--mint:#22c55e;--coral:#f2c94c;}
+  body[data-theme="bubble"] .art-bubble{display:block;}
   body[data-theme="bubble"] #chatScreen{
     background:
-      radial-gradient(ellipse 70% 40% at 20% 100%, rgba(0,0,0,.6), transparent 70%),
-      linear-gradient(180deg,#12142f 0%,#221b46 35%,#472a56 68%,#7a3b56 100%);
+      radial-gradient(ellipse 70% 40% at 20% 100%, rgba(0,0,0,.55), transparent 70%),
+      linear-gradient(180deg,#12142f 0%,#221b46 32%,#472a56 62%,#8a4560 88%,#c97a55 100%);
     background-size:cover;background-position:center;
     font-family:'Patrick Hand','Caveat',cursive;}
   body[data-theme="bubble"] #chatScreen::before{content:'';position:absolute;inset:0;pointer-events:none;z-index:0;
@@ -42,27 +55,24 @@
       radial-gradient(1px 1px at 90% 6%, #fff, transparent),
       radial-gradient(1px 1px at 46% 13%, #fff, transparent);
     opacity:.7;}
-  body[data-theme="bubble"] #chatScreen::after{content:'';position:absolute;left:0;right:-10%;bottom:0;height:110px;
-    pointer-events:none;z-index:0;opacity:.9;
-    background:
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 130'%3E%3Cg fill='%230a0616'%3E%3Cellipse cx='60' cy='120' rx='58' ry='8'/%3E%3Cpath d='M25 118 C20 90 30 65 55 60 C58 45 78 45 82 60 C104 65 108 92 100 118 Z'/%3E%3Ccircle cx='58' cy='48' r='16'/%3E%3Cpath d='M100 114 C104 98 118 92 128 98 C140 92 150 102 146 114 C150 122 138 126 128 122 C118 128 96 124 100 114 Z'/%3E%3Cpath d='M146 102 L158 94 L150 106 Z'/%3E%3Cpath d='M104 98 L96 86 L108 92 Z'/%3E%3C/g%3E%3C/svg%3E") no-repeat left bottom/340px 110px,
-      linear-gradient(180deg, transparent, rgba(6,3,14,.6));}
   body[data-theme="bubble"] .threadBar, body[data-theme="bubble"] .composer{background:rgba(10,5,20,.4);backdrop-filter:blur(8px);font-family:'Patrick Hand',cursive;}
-  body[data-theme="bubble"] .msgs{gap:26px;padding:22px 20px 110px;}
+  body[data-theme="bubble"] .msgs{gap:24px;padding:20px 18px 130px;position:relative;z-index:1;}
   body[data-theme="bubble"] .bubble{background:transparent!important;
-    padding:14px 20px;backdrop-filter:blur(4px);position:relative;z-index:1;
+    padding:13px 19px;backdrop-filter:blur(4px);position:relative;z-index:1;
     font-family:'Patrick Hand','Caveat',cursive;font-size:17px;line-height:1.4;
     box-shadow:0 8px 20px rgba(0,0,0,.4);border-width:2.5px!important;border-style:solid!important;
-    border-radius:255px 15px 225px 15px/15px 225px 15px 255px!important;}
+    border-radius:28px 28px 28px 8px!important;}
+  body[data-theme="bubble"] .bubbleRow:nth-child(odd) .bubble{transform:rotate(-.6deg);}
+  body[data-theme="bubble"] .bubbleRow:nth-child(even) .bubble{transform:rotate(.6deg);}
   body[data-theme="bubble"] .bubbleRow.me .bubble{border-color:#22c55e!important;
-    background:rgba(34,197,94,.15)!important;color:#eafff0;
-    border-radius:15px 225px 15px 255px/225px 15px 255px 15px!important;
+    background:rgba(34,197,94,.16)!important;color:#eafff0;
+    border-radius:28px 28px 8px 28px!important;
     box-shadow:0 0 15px rgba(34,197,94,.6),0 0 32px rgba(34,197,94,.28),inset 0 0 12px rgba(34,197,94,.15);}
   body[data-theme="bubble"] .bubbleRow.them .bubble{border-color:#a855f7!important;
-    background:rgba(168,85,247,.15)!important;color:#f4ecff;
+    background:rgba(168,85,247,.16)!important;color:#f4ecff;
     box-shadow:0 0 15px rgba(168,85,247,.6),0 0 32px rgba(168,85,247,.28),inset 0 0 12px rgba(168,85,247,.15);}
   body[data-theme="bubble"] .bubbleRow.them:nth-child(even) .bubble{border-color:#f2c94c!important;
-    background:rgba(242,201,76,.15)!important;color:#fffaea;
+    background:rgba(242,201,76,.16)!important;color:#fffaea;
     box-shadow:0 0 15px rgba(242,201,76,.6),0 0 32px rgba(242,201,76,.28),inset 0 0 12px rgba(242,201,76,.15);}
   body[data-theme="bubble"] .bubble::before{content:'';position:absolute;width:26px;height:26px;top:-15px;
     pointer-events:none;opacity:.95;filter:drop-shadow(0 0 4px rgba(255,255,255,.35));}
@@ -74,18 +84,17 @@
     background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M11 16 L13 34 H27 L29 16' fill='none' stroke='%23f2c94c' stroke-width='2.2' stroke-linejoin='round'/%3E%3Cpath d='M9 16 Q10 8 16 10 Q17 4 22 8 Q28 5 29 12 Q33 12 31 16 Z' fill='none' stroke='%23f2c94c' stroke-width='2.2' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat center/contain;}
   body[data-theme="bubble"] .stamp{font-family:'Quicksand',sans-serif;font-size:9.5px;}
 
-  /* ===== 2. Comic Strip — every message is its own comic panel with a
-     bold black stroke, pastel panel colour, avatar on one side and an
-     authentic speech balloon with a tail pointing to the speaker,
-     matching image #2. ===== */
+  /* ===== 2. Comic Strip — comic-book panels with an illustrated
+     chibi character (blue-hoodie boy / pink-hoodie girl) beside a
+     pointed speech balloon, cycling pastel panels, image #2. ===== */
   body[data-theme="comic"]{--violet:#ff5da2;--violet-soft:#ff8ac0;--mint:#2ee6a6;--coral:#ffd166;}
   body[data-theme="comic"] #chatScreen{background:#efe6d2;color:#111;
     background-image:radial-gradient(rgba(0,0,0,.05) 1px, transparent 1px),radial-gradient(rgba(0,0,0,.035) 1px, transparent 1px);
     background-size:7px 7px,11px 11px;background-position:0 0,3px 4px;
     font-family:'Comic Neue',cursive;}
-  body[data-theme="comic"] #chatScreen .msgs{gap:16px;padding:16px 14px 20px;}
+  body[data-theme="comic"] #chatScreen .msgs{gap:18px;padding:16px 14px 20px;position:relative;z-index:1;}
   body[data-theme="comic"] .threadBar{background:#efe6d2;border-bottom:3px solid #111;color:#111;}
-  body[data-theme="comic"] .threadBar .name{color:#111;font-family:'Comic Neue',cursive;font-weight:700;}
+  body[data-theme="comic"] .threadBar .name{color:#111;font-family:'Bangers','Comic Neue',cursive;font-weight:400;letter-spacing:.5px;font-size:18px;}
   body[data-theme="comic"] .threadBar .iconBtn{color:#111;}
   body[data-theme="comic"] .composer{background:#efe6d2;border-top:3px solid #111;}
   body[data-theme="comic"] .composer textarea{background:#fff;border:2.5px solid #111;color:#111;font-family:'Comic Neue',cursive;}
@@ -101,15 +110,24 @@
   body[data-theme="comic"] .bubbleRow:nth-child(4n){background:#ffe9ad;}
   body[data-theme="comic"] .bubbleRow:nth-child(4n+3)::before{content:'★';position:absolute;top:-14px;right:-8px;
     font-size:26px;color:#ffb703;text-shadow:1.5px 1.5px 0 #111;transform:rotate(14deg);z-index:3;}
-  body[data-theme="comic"] .bubbleAvatar{display:flex!important;width:48px;height:48px;border-radius:10px;
-    border:3px solid #111;box-shadow:2px 2px 0 #111;flex-shrink:0;font-size:16px;}
+  body[data-theme="comic"] .bubbleAvatar{display:flex!important;width:52px;height:60px;border-radius:10px;
+    border:3px solid #111;box-shadow:2px 2px 0 #111;flex-shrink:0;font-size:16px;position:relative;
+    background:#ffe0c2;overflow:hidden;}
+  /* chibi illustration drawn behind the real photo/initial — shows
+     through only until the person sets a real profile picture */
+  body[data-theme="comic"] .bubbleAvatar::before{content:'';position:absolute;inset:0;z-index:0;background-size:cover;background-position:top center;}
+  body[data-theme="comic"] .bubbleRow.me .bubbleAvatar::before{
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 68'%3E%3Crect width='60' height='68' fill='%23ffe0c2'/%3E%3Cpath d='M6 68 C6 46 16 36 30 36 C44 36 54 46 54 68 Z' fill='%23ff6fb8'/%3E%3Ccircle cx='30' cy='27' r='15' fill='%23ffdcb8'/%3E%3Cpath d='M14 22 C14 8 46 8 46 22 C46 16 40 10 30 10 C20 10 14 16 14 22 Z' fill='%233a2416'/%3E%3Ccircle cx='47' cy='24' r='4' fill='%233a2416'/%3E%3Cpath d='M45 20 C50 16 54 20 52 26' fill='none' stroke='%233a2416' stroke-width='2'/%3E%3Ccircle cx='24' cy='28' r='2' fill='%232a1a10'/%3E%3Ccircle cx='36' cy='28' r='2' fill='%232a1a10'/%3E%3Cpath d='M25 34 Q30 38 35 34' fill='none' stroke='%232a1a10' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");}
+  body[data-theme="comic"] .bubbleRow.them .bubbleAvatar::before{
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 68'%3E%3Crect width='60' height='68' fill='%23dbe9ff'/%3E%3Cpath d='M6 68 C6 46 16 36 30 36 C44 36 54 46 54 68 Z' fill='%232f6fd6'/%3E%3Ccircle cx='30' cy='27' r='15' fill='%23f0c8a0'/%3E%3Cpath d='M13 24 C11 10 49 10 47 24 L44 20 C40 12 20 12 16 20 Z' fill='%23241a12'/%3E%3Crect x='8' y='18' width='7' height='11' rx='3' fill='%23241a12'/%3E%3Crect x='45' y='18' width='7' height='11' rx='3' fill='%23241a12'/%3E%3Cpath d='M12 18 Q30 2 48 18' fill='none' stroke='%23241a12' stroke-width='3'/%3E%3Ccircle cx='24' cy='28' r='2' fill='%232a1a10'/%3E%3Ccircle cx='36' cy='28' r='2' fill='%232a1a10'/%3E%3Cpath d='M25 34 Q30 37 35 34' fill='none' stroke='%232a1a10' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");}
+  body[data-theme="comic"] .avatar[data-uid] img{position:relative;z-index:1;}
   body[data-theme="comic"] .bubbleRow.me .bubbleAvatar{order:2;}
   body[data-theme="comic"] .bubbleRow.me .bubble{order:1;}
   body[data-theme="comic"] .bubbleRow.them .bubbleAvatar{order:0;}
   body[data-theme="comic"] .bubbleRow.them .bubble{order:1;}
-  body[data-theme="comic"] .bubble{font-weight:700;text-transform:uppercase;letter-spacing:.2px;
+  body[data-theme="comic"] .bubble{font-weight:400;text-transform:uppercase;letter-spacing:.3px;
     border:2.5px solid #111!important;box-shadow:3px 3px 0 #111;position:relative;z-index:1;
-    border-radius:20px!important;font-family:'Comic Neue',cursive;font-size:14.5px;}
+    border-radius:20px!important;font-family:'Bangers','Comic Neue',cursive;font-size:17px;}
   body[data-theme="comic"] .bubbleRow.me .bubble{background:#ffe98a!important;color:#171717!important;
     border-radius:20px 20px 4px 20px!important;box-shadow:-3px 3px 0 #111;}
   body[data-theme="comic"] .bubbleRow.them .bubble{background:#9ee6ff!important;color:#171717!important;
@@ -118,51 +136,59 @@
     border:10px solid transparent;border-top:13px solid #ffe98a;border-bottom:0;filter:drop-shadow(2.5px 2.5px 0 #111);}
   body[data-theme="comic"] .bubbleRow.them .bubble::after{content:'';position:absolute;left:18px;bottom:-11px;width:0;height:0;
     border:10px solid transparent;border-top:13px solid #9ee6ff;border-bottom:0;filter:drop-shadow(2.5px 2.5px 0 #111);}
-  body[data-theme="comic"] .stamp{color:#171717;opacity:.6;font-weight:400;text-transform:none;}
+  body[data-theme="comic"] .stamp{color:#171717;opacity:.6;font-weight:400;text-transform:none;font-family:'Comic Neue',cursive;}
 
-  /* ===== 3. Handwritten Note — realistic tilted Post-it notes on a
-     matte blackboard, cycling pink+heart / blue+paperclip / yellow
-     torn-edge, matching image #3. ===== */
+  /* ===== 3. Handwritten Note — tilted paper scraps on a warm wood
+     desk, cycling pink+heart+smiley / blue+paperclip / torn yellow
+     with a clapperboard doodle, image #3. ===== */
   body[data-theme="handwritten"]{--violet:#c2703d;--violet-soft:#dd9a68;--mint:#7fae6a;--coral:#d16b6b;}
+  body[data-theme="handwritten"] .art-handwritten{display:block;}
   body[data-theme="handwritten"] #chatScreen{background:
-      radial-gradient(circle at 15% 10%, rgba(255,255,255,.035), transparent 45%),
-      radial-gradient(circle at 85% 85%, rgba(255,255,255,.03), transparent 40%),
-      #1b1b1b;
+      repeating-linear-gradient(90deg, rgba(0,0,0,.05) 0 2px, transparent 2px 26px),
+      repeating-linear-gradient(0deg, rgba(255,255,255,.02) 0 1px, transparent 1px 6px),
+      radial-gradient(ellipse 90% 60% at 50% 0%, rgba(255,255,255,.05), transparent 55%),
+      linear-gradient(160deg, #4a3018 0%, #3a2410 45%, #2a1a0b 100%);
     font-family:'Caveat','Gloria Hallelujah',cursive;}
-  body[data-theme="handwritten"] #chatScreen::before{content:'⭐ ★ ✦';position:absolute;top:12%;right:6%;
-    font-size:30px;opacity:.12;pointer-events:none;z-index:0;letter-spacing:22px;transform:rotate(8deg);color:#fff;}
-  body[data-theme="handwritten"] #chatScreen::after{content:'✎ ✦ ☆';position:absolute;bottom:20%;left:5%;
-    font-size:26px;opacity:.1;pointer-events:none;z-index:0;letter-spacing:20px;transform:rotate(-6deg);color:#fff;}
   body[data-theme="handwritten"] .threadBar, body[data-theme="handwritten"] .composer{
-    font-family:'Caveat',cursive;background:#1b1b1b;}
+    font-family:'Caveat',cursive;background:rgba(30,18,8,.85);}
   body[data-theme="handwritten"] .composer textarea{font-family:'Caveat',cursive;font-size:17px;}
-  body[data-theme="handwritten"] #chatScreen .msgs{position:relative;z-index:1;gap:30px;padding:24px 18px;}
+  body[data-theme="handwritten"] #chatScreen .msgs{position:relative;z-index:1;gap:32px;padding:26px 18px;}
   body[data-theme="handwritten"] .bubble{font-family:'Caveat','Gloria Hallelujah',cursive;font-size:20px;
-    line-height:1.3;padding:14px 18px;border-radius:3px!important;position:relative;
+    line-height:1.3;padding:14px 18px;border-radius:3px!important;position:relative;color:#1e293b!important;
     box-shadow:0 10px 20px rgba(0,0,0,.5);}
-  body[data-theme="handwritten"] .bubbleRow:nth-child(3n+1) .bubble{background:#ffd9e6!important;color:#5a1f34!important;transform:rotate(-2deg);}
-  body[data-theme="handwritten"] .bubbleRow:nth-child(3n+1) .bubble::after{content:'';position:absolute;top:-18px;left:22px;
-    width:32px;height:28px;transform:rotate(-6deg);pointer-events:none;
+  body[data-theme="handwritten"] .bubbleRow:nth-child(3n+1) .bubble{background:#ffd9e6!important;transform:rotate(-2deg);}
+  body[data-theme="handwritten"] .bubbleRow:nth-child(3n+1) .bubble::after{content:'';position:absolute;top:-18px;left:20px;
+    width:30px;height:26px;transform:rotate(-6deg);pointer-events:none;
     background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 34'%3E%3Cpath d='M20 30 C4 20 4 8 13 6 C18 5 20 10 20 10 C20 10 22 5 27 6 C36 8 36 20 20 30 Z' fill='none' stroke='%23d16b6b' stroke-width='2.4' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat center/contain;}
-  body[data-theme="handwritten"] .bubbleRow:nth-child(3n+2) .bubble{background:#cfe3ff!important;color:#1c2e4a!important;transform:rotate(1.6deg);}
-  body[data-theme="handwritten"] .bubbleRow:nth-child(3n+2) .bubble::before{content:'';position:absolute;top:-16px;right:20px;
-    width:20px;height:32px;transform:rotate(10deg);pointer-events:none;
+  body[data-theme="handwritten"] .bubbleRow:nth-child(3n+1) .bubble::before{content:'';position:absolute;top:-14px;right:16px;
+    width:22px;height:22px;pointer-events:none;
+    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='15' fill='none' stroke='%231e293b' stroke-width='2'/%3E%3Ccircle cx='14' cy='16' r='1.8' fill='%231e293b'/%3E%3Ccircle cx='26' cy='16' r='1.8' fill='%231e293b'/%3E%3Cpath d='M12 24 Q20 32 28 24' fill='none' stroke='%231e293b' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat center/contain;}
+  body[data-theme="handwritten"] .bubbleRow:nth-child(3n+2) .bubble{background:#cfe3ff!important;transform:rotate(1.6deg);}
+  body[data-theme="handwritten"] .bubbleRow:nth-child(3n+2) .bubble::before{content:'';position:absolute;top:-17px;right:20px;
+    width:20px;height:34px;transform:rotate(10deg);pointer-events:none;
     background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 40'%3E%3Cpath d='M10 6 L10 28 a5 5 0 0 0 10 0 L20 10 a3 3 0 0 0 -6 0 L14 26' fill='none' stroke='%236a91c9' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat center/contain;}
-  body[data-theme="handwritten"] .bubbleRow:nth-child(3n) .bubble{background:#fff3b0!important;color:#4a3c08!important;transform:rotate(-1.2deg);
+  body[data-theme="handwritten"] .bubbleRow:nth-child(3n) .bubble{background:#fff3b0!important;transform:rotate(-1.2deg);
     clip-path:polygon(0% 5%,6% 0%,14% 4%,24% 0%,34% 4%,46% 0%,58% 4%,70% 0%,82% 4%,92% 0%,100% 5%,
       100% 95%,92% 100%,82% 96%,70% 100%,58% 96%,46% 100%,34% 96%,24% 100%,14% 96%,6% 100%,0% 95%);}
-  body[data-theme="handwritten"] .stamp{font-family:'Caveat',cursive;font-size:13px;opacity:.7;}
+  body[data-theme="handwritten"] .bubbleRow:nth-child(3n) .bubble::before{content:'';position:absolute;top:-16px;left:18px;
+    width:26px;height:26px;pointer-events:none;
+    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect x='6' y='16' width='28' height='18' rx='2' fill='none' stroke='%231e293b' stroke-width='2'/%3E%3Cpath d='M6 16 L12 8 L18 16 M18 16 L24 8 L30 16' fill='none' stroke='%231e293b' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat center/contain;}
+  body[data-theme="handwritten"] .stamp{font-family:'Caveat',cursive;font-size:13px;opacity:.65;color:#1e293b;}
 
-  /* ===== 4. Character Chat — glassy neon-glow bubbles floating on a
-     pitch-black backdrop, purple for outgoing and cyan for incoming,
-     matching image #4. ===== */
+  /* ===== 4. Character Chat — cozy warm-lit bedroom illustration
+     behind glassy neon bubbles, "GOOD VIBES ONLY" badge, image #4. ===== */
   body[data-theme="character"]{--violet:#a855f7;--violet-soft:#c9a3ff;--mint:#22d3ee;--coral:#f472b6;}
+  body[data-theme="character"] .art-character{display:block;opacity:.9;}
   body[data-theme="character"] #chatScreen{
-    background:radial-gradient(circle at 30% 0%, #1c1030 0%, #050208 65%);}
+    background:radial-gradient(circle at 74% 14%, #4a2f66 0%, #1c1030 40%, #0a0616 75%);}
+  body[data-theme="character"] #chatScreen::after{content:'✨ GOOD VIBES ONLY ✨';position:absolute;right:12px;bottom:86px;
+    background:#1c1430;color:#ffd23f;font-weight:700;font-size:9.5px;letter-spacing:.4px;line-height:1.4;
+    padding:10px 8px;border-radius:8px;transform:rotate(-4deg);box-shadow:0 8px 18px rgba(0,0,0,.5);
+    max-width:66px;text-align:center;z-index:1;font-family:'Quicksand',sans-serif;}
   body[data-theme="character"] .threadBar, body[data-theme="character"] .composer{
     background:rgba(6,3,12,.5);backdrop-filter:blur(8px);}
   body[data-theme="character"] .avatar{box-shadow:0 0 12px rgba(168,85,247,.65),0 0 0 2px rgba(168,85,247,.4);}
-  body[data-theme="character"] .msgs{gap:16px;}
+  body[data-theme="character"] .msgs{gap:16px;position:relative;z-index:1;}
   body[data-theme="character"] .bubble{position:relative;z-index:1;
     background:rgba(18,10,28,.55)!important;backdrop-filter:blur(9px);
     border-radius:20px!important;padding:12px 16px;}
@@ -173,46 +199,56 @@
     color:#eafdff;border-radius:20px 20px 20px 5px!important;
     box-shadow:0 0 15px rgba(34,211,238,.6),0 0 34px rgba(34,211,238,.25),inset 0 0 10px rgba(34,211,238,.2);}
 
-  /* ===== 5. Swipe Chat Cards — a Tinder-style deck: glassy sunset or
-     ocean gradient cards, cursive text, three floating action buttons
-     below, matching image #5. ===== */
+  /* ===== 5. Swipe Chat Cards — Polaroid deck: warm sunset-beach
+     photo card up front, teal card peeking rotated behind, three
+     round action buttons, image #5. ===== */
   .swipeStackWrap{display:none;}
   body[data-theme="swipe"] .msgs{display:none;}
   body[data-theme="swipe"] .swipeStackWrap{flex:1;display:flex;flex-direction:column;
     align-items:center;justify-content:center;padding:22px;gap:22px;position:relative;z-index:1;}
   body[data-theme="swipe"] #chatScreen{background:radial-gradient(circle at 30% 0%,#241f45,#0d0e26 70%);}
   .swipeStack{position:relative;width:100%;max-width:290px;height:380px;}
-  .swipeCard{position:absolute;inset:0;border-radius:28px;padding:22px;display:flex;flex-direction:column;
+  .swipeCard{position:absolute;inset:0;border-radius:22px;padding:22px;display:flex;flex-direction:column;
     justify-content:flex-end;box-shadow:0 24px 50px rgba(0,0,0,.5);overflow:hidden;
-    transition:transform .18s ease;border:1px solid rgba(255,255,255,.28);backdrop-filter:blur(2px);}
-  .swipeCard::before{content:'';position:absolute;inset:0;pointer-events:none;
-    background:linear-gradient(160deg, rgba(255,255,255,.28), rgba(255,255,255,0) 40%);}
-  .swipeCard.peek{transform:scale(.93) translateY(14px);opacity:.55;filter:blur(1px);z-index:1;}
-  .swipeCard.front{z-index:2;}
-  .swipeCard.front.me{background:linear-gradient(160deg,#ffb37a 0%,#ff6f91 45%,#7c3aed 100%);}
+    transition:transform .18s ease;border:6px solid #fdf9f0;background-color:#fdf9f0;}
+  .swipeCard::before{content:'';position:absolute;inset:0;pointer-events:none;}
+  .swipeCard.peek{transform:scale(.94) translateY(16px) rotate(4deg);opacity:.85;z-index:1;}
+  .swipeCard.front{z-index:2;transform:rotate(-1.5deg);}
+  .swipeCard.front.me{background:linear-gradient(180deg,#ffd9a0 0%,#ff9d76 28%,#ff6f91 52%,#8b4a9c 78%,#3d2a5c 100%);}
+  .swipeCard.front.me::before{
+    background:
+      radial-gradient(circle at 78% 22%, #fff3c4 0 26px, rgba(255,243,196,.5) 27px 40px, transparent 42px),
+      linear-gradient(0deg, #14314a 0%, #14314a 14%, transparent 14.5%);
+    opacity:.9;}
+  .swipeCard.front.me::after{content:'';position:absolute;left:0;right:0;bottom:12%;height:3px;background:#0e2436;opacity:.85;}
   .swipeCard.front.them{background:linear-gradient(160deg,#5ddede 0%,#0ea5a5 55%,#0c3a5e 100%);}
-  .swipeCard .bubbleAvatar{display:flex!important;width:44px;height:44px;position:absolute;top:18px;left:18px;
-    border:2.5px solid rgba(255,255,255,.75);box-shadow:0 4px 12px rgba(0,0,0,.3);}
-  .swipeCard .swipeText{font-family:'Caveat',cursive;font-size:27px;font-weight:600;color:#fff;line-height:1.35;
-    text-shadow:0 2px 10px rgba(0,0,0,.45);position:relative;z-index:1;}
-  .swipeCard img{width:100%;border-radius:16px;margin-bottom:8px;display:block;position:relative;z-index:1;}
-  .swipeCard .stamp{align-self:flex-end;color:rgba(255,255,255,.85);font-size:11px;margin-top:10px;position:relative;z-index:1;}
-  .swipeEmpty{color:var(--text-lo);font-size:13px;text-align:center;margin:auto;font-family:'Caveat',cursive;font-size:20px;}
+  .swipeCard.front.them::before{background:linear-gradient(160deg, rgba(255,255,255,.3), rgba(255,255,255,0) 45%);}
+  .swipeCard .bubbleAvatar{display:flex!important;width:40px;height:40px;position:absolute;top:16px;left:16px;
+    border:2.5px solid rgba(255,255,255,.85);box-shadow:0 4px 12px rgba(0,0,0,.3);z-index:2;}
+  .swipeCard .swipeText{font-family:'Caveat',cursive;font-size:28px;font-weight:600;color:#2b1608;line-height:1.3;
+    position:relative;z-index:1;}
+  .swipeCard.front.them .swipeText{color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.45);}
+  .swipeCard img{width:100%;border-radius:14px;margin-bottom:8px;display:block;position:relative;z-index:1;}
+  .swipeCard .stamp{align-self:flex-end;color:rgba(30,20,10,.65);font-size:11px;margin-top:10px;position:relative;z-index:1;font-family:'Quicksand',sans-serif;}
+  .swipeCard.front.them .stamp{color:rgba(255,255,255,.85);}
+  .swipeEmpty{color:var(--text-lo);font-size:20px;text-align:center;margin:auto;font-family:'Caveat',cursive;}
   .swipeControls{display:flex;gap:24px;position:relative;z-index:1;}
-  .swipeBtn{width:56px;height:56px;border-radius:50%;border:2px solid rgba(255,255,255,.25);font-size:22px;cursor:pointer;
-    display:flex;align-items:center;justify-content:center;box-shadow:0 10px 22px rgba(0,0,0,.45);backdrop-filter:blur(4px);}
-  .swipeBtn.back{background:linear-gradient(160deg,#ff6b6b,#e11d48);color:#fff;}
-  .swipeBtn.reply{background:linear-gradient(160deg,#60a5fa,#2563eb);color:#fff;}
-  .swipeBtn.like{background:linear-gradient(160deg,#5eead4,#0d9488);color:#fff;}
+  .swipeBtn{width:56px;height:56px;border-radius:50%;border:none;font-size:22px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;box-shadow:0 10px 22px rgba(0,0,0,.45);}
+  .swipeBtn.back{background:#ef4444;color:#fff;}
+  .swipeBtn.reply{background:#3b82f6;color:#fff;}
+  .swipeBtn.like{background:#14b8a6;color:#fff;}
   .swipeBtn:active{transform:scale(.92);}
   .swipeCounter{color:var(--text-lo);font-size:12px;position:relative;z-index:1;font-family:'Quicksand',sans-serif;}
 
   /* ===== 6. Doodle Drawing Chat — sketchy chalk-outline bubbles on a
-     matte chalkboard with rocket / cat / sun doodles and chalk-dust
-     specks, matching image #6. ===== */
+     matte chalkboard with rocket / cat / sun / stick-figure doodles
+     and chalk-dust specks, image #6. ===== */
   body[data-theme="doodle"]{--violet:#ffd23f;--violet-soft:#ffe28a;--mint:#3fd6b0;--coral:#ff6fd8;}
-  body[data-theme="doodle"] #chatScreen{background:#0b0b12;
-    background-image:radial-gradient(rgba(255,255,255,.03) 1px, transparent 1px);background-size:5px 5px;}
+  body[data-theme="doodle"] .art-doodle{display:block;}
+  body[data-theme="doodle"] #chatScreen{background:#0e0e12;
+    background-image:radial-gradient(rgba(255,255,255,.03) 1px, transparent 1px);background-size:5px 5px;
+    font-family:'Permanent Marker','Patrick Hand',cursive;}
   body[data-theme="doodle"] #chatScreen::before{content:'';position:absolute;inset:0;pointer-events:none;z-index:0;opacity:.6;
     background-image:
       radial-gradient(circle at 10% 15%, rgba(255,210,63,.35) 0 2px, transparent 3px),
@@ -221,12 +257,15 @@
       radial-gradient(circle at 75% 72%, rgba(255,210,63,.3) 0 2px, transparent 3px),
       radial-gradient(circle at 92% 55%, rgba(63,214,176,.25) 0 1.5px, transparent 3px),
       radial-gradient(circle at 6% 55%, rgba(255,255,255,.2) 0 1.5px, transparent 3px);}
-  body[data-theme="doodle"] .threadBar, body[data-theme="doodle"] #chatScreen .msgs{font-family:'Kalam',cursive;}
-  body[data-theme="doodle"] .threadBar{border-bottom:1px solid rgba(255,210,63,.22);background:#0b0b12;}
-  body[data-theme="doodle"] .composer{border-top:1px solid rgba(63,214,176,.22);background:#0b0b12;}
-  body[data-theme="doodle"] .msgs{gap:26px;padding:22px 20px;}
+  body[data-theme="doodle"] .threadBar, body[data-theme="doodle"] #chatScreen .msgs{font-family:'Permanent Marker','Patrick Hand',cursive;}
+  body[data-theme="doodle"] .threadBar .name{font-size:15px;}
+  body[data-theme="doodle"] .threadBar{border-bottom:1px solid rgba(255,210,63,.22);background:#0e0e12;}
+  body[data-theme="doodle"] .composer{border-top:1px solid rgba(63,214,176,.22);background:#0e0e12;}
+  body[data-theme="doodle"] .composer textarea{font-family:'Patrick Hand',cursive;}
+  body[data-theme="doodle"] .msgs{gap:28px;padding:22px 20px;position:relative;z-index:1;}
   body[data-theme="doodle"] .bubble{border:2.5px dashed currentColor!important;border-radius:20px 4px 20px 4px!important;
-    background:transparent!important;font-family:'Kalam',cursive;position:relative;z-index:1;padding:12px 16px;}
+    background:transparent!important;font-family:'Permanent Marker','Kalam',cursive;font-size:14px;
+    position:relative;z-index:1;padding:13px 17px;}
   body[data-theme="doodle"] .bubbleRow.me .bubble{color:#ffd23f!important;border-radius:4px 20px 4px 20px!important;}
   body[data-theme="doodle"] .bubbleRow.them .bubble{color:#3fd6b0!important;}
   body[data-theme="doodle"] .bubbleRow.them:nth-child(even) .bubble{color:#ff6fd8!important;}
@@ -237,13 +276,15 @@
     background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M10 14 L14 6 L18 14' fill='none' stroke='%233fd6b0' stroke-width='2.2' stroke-linejoin='round'/%3E%3Cpath d='M30 14 L26 6 L22 14' fill='none' stroke='%233fd6b0' stroke-width='2.2' stroke-linejoin='round'/%3E%3Ccircle cx='20' cy='22' r='12' fill='none' stroke='%233fd6b0' stroke-width='2.2'/%3E%3Ccircle cx='15' cy='20' r='1.6' fill='%233fd6b0'/%3E%3Ccircle cx='25' cy='20' r='1.6' fill='%233fd6b0'/%3E%3Cpath d='M17 27 Q20 30 23 27' fill='none' stroke='%233fd6b0' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat center/contain;}
   body[data-theme="doodle"] .bubbleRow.them:nth-child(even) .bubble::before{
     background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='8' fill='none' stroke='%23ff6fd8' stroke-width='2.2'/%3E%3Cg stroke='%23ff6fd8' stroke-width='2.2' stroke-linecap='round'%3E%3Cline x1='20' y1='2' x2='20' y2='8'/%3E%3Cline x1='20' y1='32' x2='20' y2='38'/%3E%3Cline x1='2' y1='20' x2='8' y2='20'/%3E%3Cline x1='32' y1='20' x2='38' y2='20'/%3E%3Cline x1='7' y1='7' x2='11' y2='11'/%3E%3Cline x1='29' y1='29' x2='33' y2='33'/%3E%3Cline x1='7' y1='33' x2='11' y2='29'/%3E%3Cline x1='29' y1='11' x2='33' y2='7'/%3E%3C/g%3E%3C/svg%3E") no-repeat center/contain;}
+  body[data-theme="doodle"] .stamp{font-family:'Patrick Hand',cursive;}
 
-  /* ===== 7. Story Chat (Vertical Timeline) — a glowing line runs down
-     the thread with circular avatar nodes attached to it, connecting
-     via short horizontal ties to pastel pill bubbles, image #7. ===== */
+  /* ===== 7. Story Chat (Vertical Timeline) — deep-violet twilight
+     skyline, a glowing line running through avatar nodes to pastel
+     pill bubbles, image #7. ===== */
   body[data-theme="story"]{--violet:#8b5cf6;--violet-soft:#a78bfa;--mint:#3fd6b0;--coral:#f2994a;}
+  body[data-theme="story"] .art-story{display:block;opacity:.85;}
   body[data-theme="story"] #chatScreen{background:linear-gradient(180deg,#191340 0%,#291f55 55%,#3c2452 100%);}
-  body[data-theme="story"] .msgs{position:relative;padding-left:50px;gap:22px;}
+  body[data-theme="story"] .msgs{position:relative;padding-left:50px;gap:22px;z-index:1;}
   body[data-theme="story"] .msgs::before{content:'';position:absolute;left:20px;top:6px;bottom:6px;width:2.5px;
     background:linear-gradient(180deg, rgba(168,140,255,.75), rgba(255,255,255,.15));
     box-shadow:0 0 12px rgba(168,140,255,.6);z-index:0;border-radius:2px;}
@@ -255,16 +296,20 @@
   body[data-theme="story"] .bubble{border-radius:999px!important;max-width:78%;padding:11px 18px;position:relative;}
   body[data-theme="story"] .bubble::before{content:'';position:absolute;left:-14px;top:50%;width:14px;height:2px;
     background:rgba(255,255,255,.4);transform:translateY(-1px);z-index:0;}
+  body[data-theme="story"] .bubbleRow:nth-child(4n+1) .bubble{background:var(--coral)!important;color:#2b1608!important;}
+  body[data-theme="story"] .bubbleRow:nth-child(4n+2) .bubble{background:var(--violet)!important;color:#fff!important;border:none!important;}
+  body[data-theme="story"] .bubbleRow:nth-child(4n+3) .bubble{background:var(--mint)!important;color:#0a3327!important;}
+  body[data-theme="story"] .bubbleRow:nth-child(4n) .bubble{background:#ffcdb8!important;color:#5a2c17!important;}
   body[data-theme="story"] .bubbleRow.me .bubble{background:var(--coral)!important;color:#2b1608!important;}
   body[data-theme="story"] .bubbleRow.them .bubble{background:var(--violet)!important;color:#fff!important;border:none!important;}
   body[data-theme="story"] .stamp{opacity:.7;}
 
-  /* ===== 8. Secret / Mystery Chat — pitch-black noir with charred
-     ragged-edge bubbles, a ghost doodle by incoming messages, dashed
-     cyan "stitched" outgoing bubbles and a padlocked parchment note
-     at the bottom, matching image #8. ===== */
+  /* ===== 8. Secret / Mystery Chat — pitch-black noir with a plain
+     silhouette avatar, charred ragged-edge bubbles with a ghost
+     doodle, dashed cyan "stitched" outgoing scraps, typewriter font
+     and a padlocked parchment note, image #8. ===== */
   body[data-theme="mystery"]{--violet:#8a8a8a;--violet-soft:#b0b0b0;--mint:#22d3ee;--coral:#22d3ee;}
-  body[data-theme="mystery"] #chatScreen{background:#000;}
+  body[data-theme="mystery"] #chatScreen{background:#000;font-family:'Special Elite',monospace;}
   body[data-theme="mystery"] #chatScreen::before{content:'';position:absolute;right:6px;top:50px;width:150px;height:170px;
     opacity:.06;pointer-events:none;z-index:0;
     background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 44'%3E%3Cpath d='M20 4 C10 4 6 12 6 20 L6 40 L11 35 L16 40 L20 35 L24 40 L29 35 L34 40 L34 20 C34 12 30 4 20 4 Z' fill='none' stroke='%23fff' stroke-width='1.6'/%3E%3Ccircle cx='14' cy='18' r='2' fill='%23fff'/%3E%3Ccircle cx='26' cy='18' r='2' fill='%23fff'/%3E%3C/svg%3E") no-repeat center/contain;}
@@ -274,15 +319,17 @@
     box-shadow:0 6px 16px rgba(0,0,0,.6);max-width:150px;z-index:0;
     clip-path:polygon(0% 6%,9% 0%,20% 5%,32% 0%,44% 5%,56% 0%,68% 5%,80% 0%,91% 5%,100% 0%,
       100% 94%,91% 100%,80% 95%,68% 100%,56% 95%,44% 100%,32% 95%,20% 100%,9% 95%,0% 100%);}
-  body[data-theme="mystery"] .threadBar{background:#000;border-bottom:1px solid #1c1c1c;}
+  body[data-theme="mystery"] .threadBar{background:#000;border-bottom:1px solid #1c1c1c;font-family:'Special Elite',monospace;}
+  body[data-theme="mystery"] .threadBar .name{letter-spacing:.5px;}
   body[data-theme="mystery"] .composer{background:#000;border-top:1px solid #1c1c1c;}
-  body[data-theme="mystery"] .avatar{filter:grayscale(1) brightness(.85);}
+  body[data-theme="mystery"] .composer textarea{font-family:'Special Elite',monospace;font-size:13px;}
+  body[data-theme="mystery"] .avatar{filter:grayscale(1) brightness(.6);background:#111!important;}
   body[data-theme="mystery"] .avatar:not(:has(img)){color:transparent;position:relative;}
-  body[data-theme="mystery"] .avatar:not(:has(img))::after{content:'🎭';position:absolute;inset:0;
-    display:flex;align-items:center;justify-content:center;font-size:1.1em;color:initial;}
+  body[data-theme="mystery"] .avatar:not(:has(img))::after{content:'';position:absolute;inset:0;
+    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='20' fill='%23151515'/%3E%3Ccircle cx='20' cy='15' r='7' fill='%23000'/%3E%3Cpath d='M6 38 C6 26 12 22 20 22 C28 22 34 26 34 38 Z' fill='%23000'/%3E%3C/svg%3E") no-repeat center/cover;border-radius:50%;}
   body[data-theme="mystery"] .msgs{gap:22px;}
   body[data-theme="mystery"] .bubble{background:#0d0d0d!important;border:none!important;color:#d8d8d8;
-    font-family:'Kalam',cursive;position:relative;z-index:1;padding:13px 17px;
+    font-family:'Special Elite',monospace;font-size:13px;position:relative;z-index:1;padding:14px 17px;
     box-shadow:0 12px 26px rgba(0,0,0,.75);
     clip-path:polygon(2% 8%,9% 2%,17% 7%,26% 1%,35% 7%,45% 2%,55% 8%,65% 3%,76% 7%,87% 2%,98% 8%,
       100% 22%,95% 34%,100% 46%,94% 58%,100% 70%,93% 82%,100% 92%,90% 98%,78% 94%,66% 99%,
@@ -291,9 +338,10 @@
   body[data-theme="mystery"] .bubbleRow.them .bubble::before{content:'';position:absolute;top:-20px;left:8px;
     width:22px;height:24px;opacity:.85;pointer-events:none;
     background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 44'%3E%3Cpath d='M20 4 C10 4 6 12 6 20 L6 40 L11 35 L16 40 L20 35 L24 40 L29 35 L34 40 L34 20 C34 12 30 4 20 4 Z' fill='none' stroke='%237fd8d8' stroke-width='2.2'/%3E%3Ccircle cx='14' cy='18' r='2' fill='%237fd8d8'/%3E%3Ccircle cx='26' cy='18' r='2' fill='%237fd8d8'/%3E%3C/svg%3E") no-repeat center/contain;}
-  body[data-theme="mystery"] .bubbleRow.me .bubble{color:#e2feff!important;
-    border:1.5px dashed #22d3ee!important;box-shadow:0 0 16px rgba(34,211,238,.4),0 12px 26px rgba(0,0,0,.75);}
-  body[data-theme="mystery"] .stamp{opacity:.55;}
+  body[data-theme="mystery"] .bubbleRow.me .bubble{color:#e2feff!important;background:#0a1618!important;
+    border:1.5px dashed #22d3ee!important;box-shadow:0 0 16px rgba(34,211,238,.4),0 12px 26px rgba(0,0,0,.75);
+    clip-path:none!important;border-radius:16px 16px 4px 16px!important;}
+  body[data-theme="mystery"] .stamp{opacity:.55;font-family:'Special Elite',monospace;}
 
   .bubble.hw-text{line-height:1.5;}
   /* per-message sender avatar shown inside the bubble row — hidden
@@ -560,6 +608,82 @@
 
   <!-- CHAT THREAD -->
   <div class="screen" id="chatScreen">
+    <div class="themeArt" aria-hidden="true">
+      <svg class="art-bubble" viewBox="0 0 400 170" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
+        <g fill="#0a0716">
+          <rect x="0" y="78" width="38" height="92"/><rect x="42" y="46" width="32" height="124"/>
+          <rect x="80" y="94" width="28" height="76"/><rect x="114" y="58" width="44" height="112"/>
+          <rect x="164" y="24" width="34" height="146"/><rect x="204" y="80" width="38" height="90"/>
+          <rect x="248" y="50" width="28" height="120"/><rect x="282" y="98" width="42" height="72"/>
+          <rect x="330" y="64" width="32" height="106"/><rect x="366" y="88" width="30" height="82"/>
+        </g>
+        <g fill="#ffd97a" opacity=".5">
+          <rect x="8" y="90" width="4" height="6"/><rect x="18" y="104" width="4" height="6"/>
+          <rect x="52" y="60" width="4" height="6"/><rect x="52" y="80" width="4" height="6"/>
+          <rect x="122" y="72" width="4" height="6"/><rect x="140" y="90" width="4" height="6"/>
+          <rect x="172" y="40" width="4" height="6"/><rect x="172" y="60" width="4" height="6"/>
+          <rect x="212" y="95" width="4" height="6"/><rect x="256" y="66" width="4" height="6"/>
+          <rect x="292" y="112" width="4" height="6"/><rect x="338" y="80" width="4" height="6"/>
+        </g>
+        <rect x="0" y="163" width="400" height="7" fill="#050309"/>
+        <g fill="#050309" transform="translate(18,42) scale(1.05)">
+          <path d="M25 118 C20 90 30 65 55 60 C58 45 78 45 82 60 C104 65 108 92 100 118 Z"/>
+          <circle cx="58" cy="48" r="16"/>
+          <path d="M100 114 C104 98 118 92 128 98 C140 92 150 102 146 114 C150 122 138 126 128 122 C118 128 96 124 100 114 Z"/>
+          <path d="M146 102 L158 94 L150 106 Z"/><path d="M104 98 L96 86 L108 92 Z"/>
+        </g>
+      </svg>
+      <svg class="art-character" viewBox="0 0 300 620" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="lampGlowC" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#ffdca3" stop-opacity=".5"/>
+            <stop offset="100%" stop-color="#ffdca3" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <g fill="#ffe9b0">
+          <circle cx="20" cy="16" r="3"/><circle cx="58" cy="10" r="3"/><circle cx="98" cy="17" r="3"/>
+          <circle cx="138" cy="9" r="3"/><circle cx="178" cy="16" r="3"/><circle cx="218" cy="10" r="3"/>
+          <circle cx="258" cy="17" r="3"/>
+        </g>
+        <circle cx="250" cy="95" r="95" fill="url(#lampGlowC)"/>
+        <circle cx="250" cy="95" r="9" fill="#ffdca3"/>
+        <rect x="198" y="42" width="72" height="104" rx="4" fill="#2c1f45" opacity=".45"/>
+        <path d="M198 42 Q210 94 198 146" fill="none" stroke="#4a3266" stroke-width="4"/>
+        <path d="M270 42 Q258 94 270 146" fill="none" stroke="#4a3266" stroke-width="4"/>
+        <rect x="0" y="440" width="300" height="180" rx="18" fill="#3a2454"/>
+        <ellipse cx="58" cy="450" rx="46" ry="22" fill="#553270"/>
+        <rect x="0" y="420" width="300" height="30" rx="12" fill="#2c1a40"/>
+        <g fill="#100819">
+          <ellipse cx="224" cy="478" rx="30" ry="16"/>
+          <path d="M202 468 l-8 -14 l10 4 Z"/><path d="M216 466 l-2 -14 l9 8 Z"/>
+          <path d="M252 480 q22 4 20 -14" fill="none" stroke="#100819" stroke-width="4"/>
+        </g>
+      </svg>
+      <svg class="art-story" viewBox="0 0 400 120" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
+        <g fill="#150f33">
+          <rect x="0" y="55" width="34" height="65"/><rect x="38" y="30" width="28" height="90"/>
+          <rect x="70" y="65" width="26" height="55"/><rect x="100" y="42" width="40" height="78"/>
+          <rect x="146" y="15" width="30" height="105"/><rect x="182" y="60" width="34" height="60"/>
+          <rect x="222" y="35" width="26" height="85"/><rect x="252" y="72" width="38" height="48"/>
+          <rect x="296" y="48" width="28" height="72"/><rect x="330" y="66" width="32" height="54"/>
+          <rect x="368" y="40" width="26" height="80"/>
+        </g>
+        <g fill="#c9a3ff" opacity=".3">
+          <rect x="8" y="66" width="3" height="5"/><rect x="46" y="42" width="3" height="5"/>
+          <rect x="108" y="55" width="3" height="5"/><rect x="154" y="28" width="3" height="5"/>
+          <rect x="190" y="72" width="3" height="5"/><rect x="230" y="48" width="3" height="5"/>
+          <rect x="304" y="60" width="3" height="5"/><rect x="374" y="52" width="3" height="5"/>
+        </g>
+      </svg>
+      <div class="art-handwritten">
+        <svg class="hw-doodle hw-star" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M20 3 L24 15 L37 15 L26 23 L30 36 L20 28 L10 36 L14 23 L3 15 L16 15 Z" fill="none" stroke="#f4ecd8" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        <svg class="hw-doodle hw-flower" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="#f4b6c2" stroke-width="1.6"><circle cx="20" cy="12" r="6"/><circle cx="20" cy="28" r="6"/><circle cx="12" cy="20" r="6"/><circle cx="28" cy="20" r="6"/><circle cx="20" cy="20" r="4" fill="#ffe9a8" stroke="none"/></g></svg>
+        <svg class="hw-doodle hw-swirl" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M8 30 C4 20 10 8 20 8 C30 8 34 16 28 22 C24 26 16 24 18 18 C19 15 24 15 24 19" fill="none" stroke="#9ec7ff" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </div>
+      <div class="art-doodle">
+        <svg class="dd-doodle dd-stick" viewBox="0 0 40 60" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-dasharray="1 5"><circle cx="20" cy="10" r="7"/><line x1="20" y1="17" x2="20" y2="38"/><line x1="20" y1="24" x2="8" y2="32"/><line x1="20" y1="24" x2="32" y2="32"/><line x1="20" y1="38" x2="10" y2="55"/><line x1="20" y1="38" x2="30" y2="55"/></g></svg>
+      </div>
+    </div>
     <div class="threadBar">
       <button class="iconBtn" id="backFromChat"><svg viewBox="0 0 24 24"><path d="M15.5 4.5L8 12l7.5 7.5" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg></button>
       <div class="avatar" id="threadAvatar" style="width:38px;height:38px;font-size:14px;"></div>
