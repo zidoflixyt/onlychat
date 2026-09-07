@@ -20,41 +20,78 @@
     --line:#2a2c5e;
     --danger:#ff5c72;
   }
-  /* ===== chat themes: each theme only recolors accents + restyles the
-     chat thread background & message bubbles, so the rest of the app
-     (login, list, settings) always stays readable. ===== */
+  /* ===== chat themes: each theme restyles the chat thread's background,
+     fonts, bubble shapes AND adds decorative layers (patterns/textures),
+     while login/list/settings stay on the safe base palette. ===== */
   body[data-theme="sunset"]{--violet:#a855f7;--violet-soft:#c084fc;--mint:#38bdf8;--coral:#fb7185;}
   body[data-theme="sunset"] #chatScreen{background:linear-gradient(180deg,#2b1055 0%,#611b6b 45%,#c74b6b 78%,#f2994a 100%);}
-  body[data-theme="sunset"] .bubble{backdrop-filter:blur(6px);box-shadow:0 4px 18px rgba(0,0,0,.25);}
+  body[data-theme="sunset"] #chatScreen::before{content:'';position:absolute;inset:0;pointer-events:none;z-index:0;
+    background-image:
+      radial-gradient(1.6px 1.6px at 18% 10%, #fff, transparent),
+      radial-gradient(1.6px 1.6px at 58% 7%, #fff, transparent),
+      radial-gradient(1px 1px at 78% 16%, #fff, transparent),
+      radial-gradient(1.4px 1.4px at 34% 20%, #fff, transparent),
+      radial-gradient(1px 1px at 90% 6%, #fff, transparent);
+    opacity:.65;}
+  body[data-theme="sunset"] #chatScreen::after{content:'';position:absolute;left:0;right:0;bottom:0;height:90px;pointer-events:none;z-index:0;
+    background:linear-gradient(180deg, transparent, rgba(8,4,16,.55));}
+  body[data-theme="sunset"] .threadBar, body[data-theme="sunset"] .composer{background:rgba(10,5,20,.28);backdrop-filter:blur(4px);}
+  body[data-theme="sunset"] .bubble{backdrop-filter:blur(6px);box-shadow:0 4px 18px rgba(0,0,0,.25);position:relative;z-index:1;}
   body[data-theme="sunset"] .bubbleRow.me .bubble{background:rgba(255,255,255,.16)!important;border:1.5px solid rgba(255,255,255,.4);color:#fff;}
   body[data-theme="sunset"] .bubbleRow.them .bubble{background:rgba(15,8,30,.4)!important;border:1.5px solid rgba(255,255,255,.22);}
 
   body[data-theme="comic"]{--violet:#ff5da2;--violet-soft:#ff8ac0;--mint:#2ee6a6;--coral:#ffd166;}
-  body[data-theme="comic"] #chatScreen{background:#151515;}
-  body[data-theme="comic"] .bubble{font-family:'Poppins',sans-serif;font-weight:700;border:2.5px solid #111!important;box-shadow:3px 3px 0 #111;}
+  body[data-theme="comic"] #chatScreen{background:#151515;font-family:'Poppins',sans-serif;}
+  body[data-theme="comic"] #chatScreen .msgs{background-image:radial-gradient(rgba(255,255,255,.06) 1.4px, transparent 1.4px);background-size:15px 15px;}
+  body[data-theme="comic"] .threadBar{background:repeating-linear-gradient(135deg,#1c1c1c,#1c1c1c 9px,#242424 9px,#242424 18px);border-bottom:3px solid #111;}
+  body[data-theme="comic"] .composer{background:#1c1c1c;border-top:3px solid #111;}
+  body[data-theme="comic"] .avatar{border:3px solid #111;box-shadow:2px 2px 0 #111;overflow:hidden;}
+  body[data-theme="comic"] .bubble{font-weight:700;border:2.5px solid #111!important;box-shadow:3px 3px 0 #111;position:relative;z-index:1;}
   body[data-theme="comic"] .bubbleRow.me .bubble{background:#ffe98a!important;color:#171717!important;border-radius:16px 16px 4px 16px!important;box-shadow:-3px 3px 0 #111;}
   body[data-theme="comic"] .bubbleRow.them .bubble{background:#9ee6ff!important;color:#171717!important;border-radius:16px 16px 16px 4px!important;}
+  body[data-theme="comic"] .bubbleRow.me .bubble::after{content:'';position:absolute;right:16px;bottom:-9px;width:0;height:0;
+    border:9px solid transparent;border-top:11px solid #ffe98a;border-bottom:0;filter:drop-shadow(2px 2px 0 #111);}
+  body[data-theme="comic"] .bubbleRow.them .bubble::after{content:'';position:absolute;left:16px;bottom:-9px;width:0;height:0;
+    border:9px solid transparent;border-top:11px solid #9ee6ff;border-bottom:0;filter:drop-shadow(2px 2px 0 #111);}
 
   body[data-theme="handwritten"]{--violet:#c2703d;--violet-soft:#dd9a68;--mint:#7fae6a;--coral:#d16b6b;}
-  body[data-theme="handwritten"] #chatScreen{background:#211a10;}
-  body[data-theme="handwritten"] .bubble{font-family:'Kalam',cursive;font-size:16.5px;border-radius:6px!important;box-shadow:0 3px 8px rgba(0,0,0,.35);}
+  body[data-theme="handwritten"] #chatScreen{background:#241d12;font-family:'Kalam',cursive;}
+  body[data-theme="handwritten"] .threadBar{font-family:'Kalam',cursive;}
+  body[data-theme="handwritten"] #chatScreen .msgs{background-image:repeating-linear-gradient(rgba(255,255,255,.035) 0 27px, transparent 27px 28px);}
+  body[data-theme="handwritten"] .bubble{font-size:16.5px;border-radius:6px!important;box-shadow:0 3px 8px rgba(0,0,0,.35);}
   body[data-theme="handwritten"] .bubbleRow.me .bubble{background:#f6e7c1!important;color:#3a2c14!important;transform:rotate(-1deg);}
   body[data-theme="handwritten"] .bubbleRow.them .bubble{background:#e9f1e4!important;color:#2c3a1e!important;transform:rotate(1deg);}
 
   body[data-theme="character"]{--violet:#8b5cf6;--violet-soft:#a78bfa;--mint:#22d3ee;--coral:#f472b6;}
   body[data-theme="character"] #chatScreen{background:radial-gradient(circle at 30% 10%,#3a2360 0%,#160e2e 62%);}
+  body[data-theme="character"] #chatScreen::before{content:'';position:absolute;top:0;left:0;right:0;height:16px;pointer-events:none;z-index:0;
+    background-image:repeating-radial-gradient(circle at 12px 7px, #ffe28a 0 2.5px, transparent 3.5px 26px);opacity:.85;}
+  body[data-theme="character"] .avatar{box-shadow:0 0 0 3px rgba(139,92,246,.55);}
+  body[data-theme="character"] .bubble{position:relative;z-index:1;}
   body[data-theme="character"] .bubbleRow.me .bubble{background:linear-gradient(135deg,#8b5cf6,#f472b6)!important;}
   body[data-theme="character"] .bubbleRow.them .bubble{background:rgba(255,255,255,.09)!important;backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.16);}
 
   body[data-theme="doodle"]{--violet:#ffd23f;--violet-soft:#ffe28a;--mint:#3fd6b0;--coral:#ff6f91;}
   body[data-theme="doodle"] #chatScreen{background:#0b0b12;}
-  body[data-theme="doodle"] .bubble{border:2px dashed currentColor!important;border-radius:20px 4px 20px 4px!important;background:transparent!important;}
+  body[data-theme="doodle"] #chatScreen::before{content:'';position:absolute;inset:0;pointer-events:none;z-index:0;opacity:.55;
+    background-image:
+      radial-gradient(circle at 10% 15%, rgba(255,210,63,.3) 0 2px, transparent 3px),
+      radial-gradient(circle at 85% 20%, rgba(63,214,176,.3) 0 2px, transparent 3px),
+      radial-gradient(circle at 20% 82%, rgba(255,111,145,.25) 0 2px, transparent 3px),
+      radial-gradient(circle at 75% 72%, rgba(255,210,63,.25) 0 2px, transparent 3px);}
+  body[data-theme="doodle"] .threadBar, body[data-theme="doodle"] #chatScreen .msgs{font-family:'Kalam',cursive;}
+  body[data-theme="doodle"] .bubble{border:2px dashed currentColor!important;border-radius:20px 4px 20px 4px!important;
+    background:transparent!important;font-family:'Kalam',cursive;position:relative;z-index:1;}
   body[data-theme="doodle"] .bubbleRow.me .bubble{color:#ffd23f!important;}
   body[data-theme="doodle"] .bubbleRow.them .bubble{color:#3fd6b0!important;}
 
   body[data-theme="mystery"]{--violet:#8a8a8a;--violet-soft:#b0b0b0;--mint:#9d9d9d;--coral:#c74b4b;}
   body[data-theme="mystery"] #chatScreen{background:#000;}
-  body[data-theme="mystery"] .bubble{background:#111!important;border:1px solid #333!important;font-family:'Kalam',cursive;}
+  body[data-theme="mystery"] #chatScreen::before{content:'👻';position:absolute;right:14px;top:60px;font-size:130px;
+    opacity:.05;pointer-events:none;z-index:0;}
+  body[data-theme="mystery"] .threadBar{background:#000;border-bottom:1px solid #222;}
+  body[data-theme="mystery"] .avatar{filter:grayscale(1) brightness(.85);}
+  body[data-theme="mystery"] .bubble{background:#111!important;border:1px solid #333!important;font-family:'Kalam',cursive;position:relative;z-index:1;}
   body[data-theme="mystery"] .bubbleRow.them .bubble{color:#ccc!important;}
   body[data-theme="mystery"] .bubbleRow.me .bubble{color:#eee!important;border-color:#c74b4b!important;}
 
@@ -123,7 +160,8 @@
   .chatRow:active{background:var(--bg-panel);}
   .avatar{width:46px;height:46px;border-radius:50%;flex-shrink:0;
     display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;
-    color:#fff;background:linear-gradient(135deg,var(--violet),var(--coral));}
+    color:#fff;background:linear-gradient(135deg,var(--violet),var(--coral));overflow:hidden;}
+  .avatar img{width:100%;height:100%;object-fit:cover;display:block;}
   .chatMeta{flex:1;min-width:0;}
   .chatMeta .top{display:flex;justify-content:space-between;align-items:baseline;}
   .chatMeta .name{font-weight:600;font-size:15px;}
@@ -235,6 +273,34 @@
   .kbKey.wide{min-width:64px;font-size:12px;font-weight:600;color:var(--text-lo);}
   .kbKey:active{background:var(--violet);color:#fff;}
 
+  /* ---------- settings: profile picture ---------- */
+  .photoRow{display:flex;align-items:center;gap:14px;}
+  .photoPreview{width:64px;height:64px;border-radius:50%;flex-shrink:0;overflow:hidden;
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:22px;
+    color:#fff;background:linear-gradient(135deg,var(--violet),var(--coral));}
+  .photoPreview img{width:100%;height:100%;object-fit:cover;}
+  .photoBtn{padding:10px 16px;border-radius:10px;border:1px solid var(--line);
+    background:#0f1130;color:var(--text-hi);font-weight:600;font-size:13px;cursor:pointer;}
+
+  /* ---------- message delete affordance ---------- */
+  .bubbleRow.me .bubble{cursor:pointer;}
+  .bubbleRow.me .bubble:active{opacity:.85;}
+
+  /* ---------- handwriting studio ---------- */
+  .hwLetterGrid{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin-bottom:18px;}
+  .hwLetterKey{aspect-ratio:1;border-radius:10px;border:1.5px solid var(--line);background:#0f1130;
+    display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--text-lo);
+    cursor:pointer;overflow:hidden;}
+  .hwLetterKey.done{border-color:var(--mint);color:var(--text-hi);}
+  .hwLetterKey.active{border-color:var(--violet-soft);border-width:2px;}
+  .hwLetterKey img{width:100%;height:100%;object-fit:contain;background:#fff;}
+  .hwPadWrap{background:var(--bg-panel);border:1px solid var(--line);border-radius:16px;
+    padding:16px;text-align:center;}
+  .hwPadLabel{font-size:13px;color:var(--text-lo);margin-bottom:10px;}
+  .hwPadLabel b{color:var(--text-hi);font-size:18px;}
+  #hwCanvas{background:#fff;border-radius:12px;touch-action:none;max-width:100%;}
+  .hwPadBtns{display:flex;gap:10px;margin-top:12px;}
+
   /* ---------- new chat modal ---------- */
   .modalOverlay{position:fixed;inset:0;background:rgba(6,7,20,.6);display:flex;
     align-items:flex-end;z-index:50;opacity:0;pointer-events:none;transition:opacity .15s;}
@@ -315,6 +381,9 @@
         <div class="name" id="threadName"></div>
         <span class="status" id="threadStatus"></span>
       </div>
+      <button class="iconBtn" id="deleteConvoBtn" title="Delete conversation">
+        <svg viewBox="0 0 24 24"><path d="M6 7h12M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2m-8 0v13a1 1 0 001 1h8a1 1 0 001-1V7M10 11v6M14 11v6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
     </div>
     <div class="msgs" id="msgsWrap"></div>
     <div id="customKeyboard"></div>
@@ -343,6 +412,17 @@
     </div>
     <div class="listWrap">
       <div class="myUsername">Logged in as <b id="myUsernameLabel"></b></div>
+
+      <div class="settingsCard">
+        <h3>Profile picture</h3>
+        <p>Shown to people you chat with, in their chat list and in the thread header.</p>
+        <div class="photoRow">
+          <div class="photoPreview" id="myPhotoPreview"></div>
+          <button class="photoBtn" id="changePhotoBtn">Change photo</button>
+          <input type="file" id="photoInput" accept="image/*" style="display:none;">
+        </div>
+      </div>
+
       <div class="settingsCard">
         <h3>Who can message me</h3>
         <p>Control who your first message is allowed to come from.</p>
@@ -358,11 +438,14 @@
 
       <div class="settingsCard">
         <h3>Handwriting mode</h3>
-        <p>Turn this on to get a pen icon in chat — tap it before sending and your normally-typed message goes out looking handwritten.</p>
+        <p>Draw each letter once in the Handwriting Studio. After that, turn this on, type normally with your keyboard, and your message sends out in your own handwriting.</p>
         <div class="toggleRow">
           <span class="lbl">Enable handwriting mode</span>
           <label class="switch"><input type="checkbox" id="hwEnabledToggle"><span class="slider"></span></label>
         </div>
+        <button class="primaryBtn" id="openHwStudioBtn" style="margin-top:10px;">✍️ Open Handwriting Studio</button>
+        <div class="hint" id="hwGlyphCount" style="margin-top:8px;"></div>
+        <label style="display:block;margin-top:12px;font-size:12px;color:var(--text-lo);">Fallback style for letters you haven't drawn yet</label>
         <select class="selectField" id="hwFontSelect">
           <option value="Kalam">Kalam (English + Hindi)</option>
           <option value="Caveat">Caveat (English)</option>
@@ -383,6 +466,27 @@
     </div>
   </div>
 
+  <!-- HANDWRITING STUDIO -->
+  <div class="screen" id="hwStudioScreen">
+    <div class="appbar">
+      <button class="iconBtn" id="backFromStudio"><svg viewBox="0 0 24 24"><path d="M15.5 4.5L8 12l7.5 7.5" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg></button>
+      <h1>Handwriting Studio</h1>
+      <span style="width:36px;"></span>
+    </div>
+    <div class="listWrap">
+      <p class="hint" style="margin-bottom:14px;">Tap a letter below, draw it in your own handwriting on the pad, then Save. Letters you've saved show a little green outline.</p>
+      <div class="hwLetterGrid" id="hwLetterGrid"></div>
+      <div class="hwPadWrap">
+        <div class="hwPadLabel">Drawing: <b id="hwCurLetter">a</b></div>
+        <canvas id="hwCanvas" width="260" height="260"></canvas>
+        <div class="hwPadBtns">
+          <button class="reqBtn decline" id="hwClearBtn">Clear</button>
+          <button class="reqBtn accept" id="hwSaveBtn">Save letter</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <!-- NEW CHAT MODAL -->
@@ -392,6 +496,16 @@
     <div class="field"><label>Their username</label><input id="newChatUser" autocomplete="off" placeholder="e.g. sunny_days"></div>
     <div class="authError" id="newChatErr"></div>
     <button class="primaryBtn" id="newChatGo">Start chat</button>
+  </div>
+</div>
+
+<!-- CONFIRM / DELETE MODAL -->
+<div class="modalOverlay" id="confirmModal">
+  <div class="modalSheet">
+    <h3 id="confirmTitle">Are you sure?</h3>
+    <p class="hint" id="confirmMsg" style="margin-bottom:16px;"></p>
+    <button class="primaryBtn" id="confirmYesBtn" style="background:linear-gradient(90deg,var(--danger),#c0304a);">Yes, delete</button>
+    <button class="primaryBtn" id="confirmNoBtn" style="background:transparent;border:1px solid var(--line);color:var(--text-hi);margin-top:10px;">Cancel</button>
   </div>
 </div>
 
@@ -617,6 +731,137 @@ $('kbToggleBtn').onclick = function(){
   if(showing) buildKeyboard();
 };
 
+/* ---------------- handwriting studio: draw & save your own letters ---------------- */
+const HW_LETTERS = [];
+for(let i=0;i<26;i++) HW_LETTERS.push(String.fromCharCode(97+i));
+for(let i=0;i<26;i++) HW_LETTERS.push(String.fromCharCode(65+i));
+
+let hwGlyphs = {};       // letter -> dataURL (this user's own drawn handwriting)
+let hwCurLetter = 'a';
+let hwDrawing = false, hwLastX = 0, hwLastY = 0, hwCtx = null;
+
+function hwStorageKey(){ return 'oc_hw_glyphs_' + (me ? me.uid : 'anon'); }
+function loadHwGlyphs(){
+  try{ hwGlyphs = JSON.parse(localStorage.getItem(hwStorageKey()) || '{}'); }
+  catch(e){ hwGlyphs = {}; }
+}
+function saveHwGlyphsToStorage(){ localStorage.setItem(hwStorageKey(), JSON.stringify(hwGlyphs)); }
+function updateHwCountLabel(){
+  $('hwGlyphCount').textContent = Object.keys(hwGlyphs).length + ' / 52 letters drawn so far.';
+}
+function renderHwLetterGrid(){
+  const grid = $('hwLetterGrid');
+  grid.innerHTML = '';
+  HW_LETTERS.forEach(ch=>{
+    const key = document.createElement('div');
+    key.className = 'hwLetterKey' + (hwGlyphs[ch] ? ' done' : '') + (ch === hwCurLetter ? ' active' : '');
+    key.innerHTML = hwGlyphs[ch] ? `<img src="${hwGlyphs[ch]}">` : ch;
+    key.onclick = ()=>{ hwCurLetter = ch; $('hwCurLetter').textContent = ch; loadLetterIntoCanvas(); renderHwLetterGrid(); };
+    grid.appendChild(key);
+  });
+  updateHwCountLabel();
+}
+function clearHwCanvas(){ hwCtx.fillStyle = '#fff'; hwCtx.fillRect(0, 0, $('hwCanvas').width, $('hwCanvas').height); }
+function loadLetterIntoCanvas(){
+  clearHwCanvas();
+  if(hwGlyphs[hwCurLetter]){
+    const img = new Image();
+    img.onload = ()=> hwCtx.drawImage(img, 0, 0, $('hwCanvas').width, $('hwCanvas').height);
+    img.src = hwGlyphs[hwCurLetter];
+  }
+}
+function setupHwCanvas(){
+  const canvas = $('hwCanvas');
+  hwCtx = canvas.getContext('2d');
+  hwCtx.lineWidth = 10; hwCtx.lineCap = 'round'; hwCtx.lineJoin = 'round'; hwCtx.strokeStyle = '#141414';
+  clearHwCanvas();
+  function pos(e){
+    const r = canvas.getBoundingClientRect();
+    const cx = (e.touches ? e.touches[0].clientX : e.clientX) - r.left;
+    const cy = (e.touches ? e.touches[0].clientY : e.clientY) - r.top;
+    return { x: cx * canvas.width / r.width, y: cy * canvas.height / r.height };
+  }
+  function start(e){ e.preventDefault(); hwDrawing = true; const p = pos(e); hwLastX = p.x; hwLastY = p.y; }
+  function move(e){
+    if(!hwDrawing) return; e.preventDefault();
+    const p = pos(e);
+    hwCtx.beginPath(); hwCtx.moveTo(hwLastX, hwLastY); hwCtx.lineTo(p.x, p.y); hwCtx.stroke();
+    hwLastX = p.x; hwLastY = p.y;
+  }
+  function end(){ hwDrawing = false; }
+  canvas.addEventListener('mousedown', start);
+  canvas.addEventListener('mousemove', move);
+  window.addEventListener('mouseup', end);
+  canvas.addEventListener('touchstart', start, {passive:false});
+  canvas.addEventListener('touchmove', move, {passive:false});
+  canvas.addEventListener('touchend', end);
+}
+$('openHwStudioBtn').onclick = ()=>{
+  loadHwGlyphs();
+  hwCurLetter = 'a'; $('hwCurLetter').textContent = 'a';
+  showScreen('hwStudioScreen');
+  if(!hwCtx) setupHwCanvas();
+  loadLetterIntoCanvas();
+  renderHwLetterGrid();
+};
+$('backFromStudio').onclick = ()=>{ showScreen('settingsScreen'); updateHwCountLabel(); };
+$('hwClearBtn').onclick = ()=> clearHwCanvas();
+$('hwSaveBtn').onclick = ()=>{
+  hwGlyphs[hwCurLetter] = $('hwCanvas').toDataURL('image/png');
+  saveHwGlyphsToStorage();
+  toast('Saved "' + hwCurLetter + '".');
+  renderHwLetterGrid();
+};
+
+/* builds one combined image out of the user's saved letter glyphs, so a
+   normally-typed message can be sent looking like their own handwriting.
+   any character that hasn't been drawn yet falls back to a cursive font. */
+function composeHandwritingImage(text){
+  loadHwGlyphs();
+  const cellW = 30, cellH = 42, lineH = 48, padding = 18, maxWidth = 520;
+  const lines = [[]];
+  let x = padding;
+  for(const ch of text){
+    if(ch === '\n'){ lines.push([]); x = padding; continue; }
+    const w = ch === ' ' ? 16 : cellW;
+    if(x + w > maxWidth - padding){ lines.push([]); x = padding; }
+    lines[lines.length-1].push(ch);
+    x += w;
+  }
+  const canvas = document.createElement('canvas');
+  canvas.width = maxWidth;
+  canvas.height = padding*2 + lines.length*lineH;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#fdf9ef'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.font = "26px '" + hwFont + "', cursive";
+  ctx.fillStyle = '#1c1c1c';
+  ctx.textBaseline = 'middle';
+
+  return new Promise(resolve=>{
+    let pending = 0, layoutDone = false;
+    const finishIfReady = ()=>{ if(layoutDone && pending === 0) resolve(canvas.toDataURL('image/png')); };
+    lines.forEach((lineChars, li)=>{
+      let cx = padding;
+      const cy = padding + li*lineH + lineH/2;
+      lineChars.forEach(ch=>{
+        const w = ch === ' ' ? 16 : cellW;
+        if(hwGlyphs[ch]){
+          pending++;
+          const img = new Image();
+          img.onload = ()=>{ ctx.drawImage(img, cx, cy-cellH/2, cellW, cellH); pending--; finishIfReady(); };
+          img.onerror = ()=>{ pending--; finishIfReady(); };
+          img.src = hwGlyphs[ch];
+        }else if(ch !== ' '){
+          ctx.fillText(ch, cx, cy);
+        }
+        cx += w;
+      });
+    });
+    layoutDone = true;
+    finishIfReady();
+  });
+}
+
 /* apply saved theme/prefs immediately, even before login */
 applyTheme(getPref('oc_theme','default'));
 $('hwFontSelect').value = hwFont;
@@ -695,6 +940,35 @@ $('loginBtn').onclick = async ()=>{
 
 $('logoutBtn').onclick = ()=>{ auth.signOut(); };
 
+$('changePhotoBtn').onclick = ()=> $('photoInput').click();
+$('photoInput').addEventListener('change', function(){
+  const file = this.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    const img = new Image();
+    img.onload = async ()=>{
+      const size = 220;
+      const canvas = document.createElement('canvas');
+      canvas.width = size; canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      const minSide = Math.min(img.width, img.height);
+      const sx = (img.width - minSide)/2, sy = (img.height - minSide)/2;
+      ctx.drawImage(img, sx, sy, minSide, minSide, 0, 0, size, size);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.72);
+      try{
+        await db.collection('users').doc(me.uid).update({ photoData: dataUrl });
+        photoCache[me.uid] = dataUrl;
+        $('myPhotoPreview').innerHTML = `<img src="${dataUrl}">`;
+        toast('Profile picture updated.');
+      }catch(e){ toast('Could not save photo — try a smaller image.'); }
+    };
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+  this.value = '';
+});
+
 /* ---------------- auth state ---------------- */
 auth.onAuthStateChanged(async (user)=>{
   if(chatListUnsub) chatListUnsub(); if(reqUnsub) reqUnsub(); if(threadUnsub) threadUnsub();
@@ -729,6 +1003,10 @@ auth.onAuthStateChanged(async (user)=>{
   }
   myProfile = snap.data();
   $('myUsernameLabel').textContent = myProfile.username;
+  photoCache[me.uid] = myProfile.photoData || null;
+  $('myPhotoPreview').innerHTML = myProfile.photoData ? `<img src="${myProfile.photoData}">` : initialsAvatar(myProfile.username);
+  loadHwGlyphs();
+  updateHwCountLabel();
   document.querySelectorAll('input[name=privacy]').forEach(r=>{
     r.checked = (r.value === (myProfile.privacy||'everyone'));
     r.onchange = async ()=>{
@@ -792,7 +1070,7 @@ function renderChatList(rows){
     const otherName = c.usernames ? c.usernames[otherUid] : '?';
     const row = document.createElement('div');
     row.className = 'chatRow';
-    row.innerHTML = `<div class="avatar">${initialsAvatar(otherName)}</div>
+    row.innerHTML = `${avatarPlaceholder(otherUid, otherName)}
       <div class="chatMeta">
         <div class="top"><span class="name">${escapeHtml(otherName)}</span><span class="time">${fmtTime(c.lastTime)}</span></div>
         <div class="preview">${escapeHtml(c.lastMessageType==='image' ? '📷 Photo' : (c.lastMessage||''))}</div>
@@ -800,9 +1078,29 @@ function renderChatList(rows){
     row.onclick = ()=> openChat(c.id, otherUid, otherName);
     wrap.appendChild(row);
   });
+  hydrateAvatars(wrap);
 }
 function escapeHtml(s){
   return String(s||'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+/* ---------------- profile photo cache ---------------- */
+const photoCache = {}; // uid -> dataURL | null
+function avatarPlaceholder(uid, name, extraStyle){
+  return `<div class="avatar" data-uid="${uid}"${extraStyle?` style="${extraStyle}"`:''}>${initialsAvatar(name)}</div>`;
+}
+async function hydrateAvatars(root){
+  const nodes = root.querySelectorAll('.avatar[data-uid]');
+  for(const el of nodes){
+    const uid = el.dataset.uid;
+    if(photoCache[uid] === undefined){
+      try{
+        const snap = await db.collection('users').doc(uid).get();
+        photoCache[uid] = (snap.exists && snap.data().photoData) || null;
+      }catch(e){ photoCache[uid] = null; }
+    }
+    if(photoCache[uid]) el.innerHTML = `<img src="${photoCache[uid]}">`;
+  }
 }
 
 /* ---------------- requests (pending, I'm the recipient) ---------------- */
@@ -832,7 +1130,7 @@ function renderRequests(rows){
     const otherName = c.usernames ? c.usernames[otherUid] : '?';
     const row = document.createElement('div');
     row.className = 'reqRow';
-    row.innerHTML = `<div class="reqTop"><div class="avatar">${initialsAvatar(otherName)}</div><span class="name">${escapeHtml(otherName)}</span></div>
+    row.innerHTML = `<div class="reqTop">${avatarPlaceholder(otherUid, otherName)}<span class="name">${escapeHtml(otherName)}</span></div>
       <div class="reqPreview">${escapeHtml(c.lastMessageType==='image' ? '📷 sent a photo' : c.lastMessage||'')}</div>
       <div class="reqActions">
         <button class="reqBtn decline">No, block</button>
@@ -842,6 +1140,7 @@ function renderRequests(rows){
     row.querySelector('.decline').onclick = ()=> respondRequest(c.id, otherUid, false);
     wrap.appendChild(row);
   });
+  hydrateAvatars(wrap);
 }
 async function respondRequest(chatId, otherUid, accept){
   if(accept){
@@ -862,6 +1161,15 @@ async function respondRequest(chatId, otherUid, accept){
 /* ---------------- starting a new chat ---------------- */
 $('newChatFab').onclick = ()=>{ $('newChatUser').value=''; $('newChatErr').textContent=''; $('newChatModal').classList.add('show'); };
 $('newChatModal').onclick = (e)=>{ if(e.target.id === 'newChatModal') $('newChatModal').classList.remove('show'); };
+
+function showConfirm(title, msg, onYes){
+  $('confirmTitle').textContent = title;
+  $('confirmMsg').textContent = msg;
+  $('confirmModal').classList.add('show');
+  $('confirmYesBtn').onclick = ()=>{ $('confirmModal').classList.remove('show'); onYes(); };
+  $('confirmNoBtn').onclick = ()=> $('confirmModal').classList.remove('show');
+}
+$('confirmModal').onclick = (e)=>{ if(e.target.id === 'confirmModal') $('confirmModal').classList.remove('show'); };
 
 $('newChatGo').onclick = async ()=>{
   const uname = $('newChatUser').value.trim().toLowerCase();
@@ -906,7 +1214,9 @@ function openChat(chatId, otherUid, otherName){
   hwActive = false; $('hwToggleBtn').classList.remove('on');
   $('customKeyboard').classList.remove('show'); $('kbToggleBtn').classList.remove('on');
   $('threadName').textContent = otherName;
+  $('threadAvatar').dataset.uid = otherUid;
   $('threadAvatar').textContent = initialsAvatar(otherName);
+  hydrateAvatars(document.getElementById('chatScreen'));
   $('threadStatus').textContent = '';
   $('msgsWrap').innerHTML = '';
   showScreen('chatScreen');
@@ -927,22 +1237,61 @@ function openChat(chatId, otherUid, otherName){
     .onSnapshot(snap=>{
       const wrap = $('msgsWrap');
       wrap.innerHTML = '';
-      snap.forEach(doc=>{
-        const m = doc.data();
+      snap.forEach(docSnap=>{
+        const m = docSnap.data();
         const row = document.createElement('div');
         row.className = 'bubbleRow ' + (m.from === me.uid ? 'me' : 'them');
-        let inner = '';
-        if(m.type === 'image'){ inner = `<img src="${m.imageData}">`; }
-        else if(m.style === 'handwriting'){
-          inner = `<span class="hw-text" style="font-family:'${m.font||'Kalam'}',cursive;font-size:18px;">${escapeHtml(m.text)}</span>`;
-        }
-        else { inner = escapeHtml(m.text); }
+        const inner = m.type === 'image' ? `<img src="${m.imageData}">` : escapeHtml(m.text);
         row.innerHTML = `<div class="bubble">${inner}<span class="stamp">${fmtTime(m.time)}</span></div>`;
+        if(m.from === me.uid){
+          row.title = 'Tap to delete';
+          row.onclick = ()=> showConfirm(
+            'Delete this message?',
+            "It will be permanently removed for both of you — as if it was never sent.",
+            async ()=>{
+              await db.collection('chats').doc(chatId).collection('messages').doc(docSnap.id).delete();
+              await refreshLastMessage(chatId);
+            }
+          );
+        }
         wrap.appendChild(row);
       });
       wrap.scrollTop = wrap.scrollHeight;
     });
 }
+
+async function refreshLastMessage(cid){
+  const snap = await db.collection('chats').doc(cid).collection('messages')
+    .orderBy('time', 'desc').limit(1).get();
+  if(snap.empty){
+    await db.collection('chats').doc(cid).update({ lastMessage: '', lastMessageType: 'text' });
+  }else{
+    const m = snap.docs[0].data();
+    await db.collection('chats').doc(cid).update({
+      lastMessage: m.type === 'image' ? '' : (m.text || ''),
+      lastMessageType: m.type,
+      lastTime: m.time
+    });
+  }
+}
+
+$('deleteConvoBtn').onclick = ()=>{
+  const cid = activeChatId, otherName = activeOtherName;
+  showConfirm(
+    'Delete this conversation?',
+    `This permanently deletes the entire chat with ${otherName} for both of you. This can't be undone.`,
+    async ()=>{
+      if(threadUnsub) threadUnsub();
+      const msgsSnap = await db.collection('chats').doc(cid).collection('messages').get();
+      const batch = db.batch();
+      msgsSnap.forEach(d=> batch.delete(d.ref));
+      await batch.commit();
+      await db.collection('chats').doc(cid).delete();
+      toast('Conversation deleted.');
+      showScreen('chatListScreen');
+    }
+  );
+};
 
 async function sendMessage(payload){
   const cid = activeChatId;
@@ -961,10 +1310,19 @@ $('sendBtn').onclick = async ()=>{
   const text = box.value.trim();
   if(!text) return;
   box.value = '';
-  const payload = { type: 'text', text };
-  if(hwEnabled && hwActive){ payload.style = 'handwriting'; payload.font = hwFont; }
-  await sendMessage(payload);
-  if(hwActive){ hwActive = false; $('hwToggleBtn').classList.remove('on'); }
+  box.style.height = 'auto';
+  if(hwEnabled && hwActive){
+    $('sendBtn').disabled = true;
+    try{
+      const imgData = await composeHandwritingImage(text);
+      await sendMessage({ type: 'image', imageData: imgData, style: 'handwriting-img' });
+    }finally{
+      $('sendBtn').disabled = false;
+      hwActive = false; $('hwToggleBtn').classList.remove('on');
+    }
+    return;
+  }
+  await sendMessage({ type: 'text', text });
 };
 $('msgInput').addEventListener('keydown', e=>{
   if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); $('sendBtn').click(); }
