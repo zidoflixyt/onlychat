@@ -741,13 +741,14 @@ function composeHandwritingImage(text){
       const cy = padding + li*lineH + lineH/2;
       lineChars.forEach(ch=>{
         const w = ch === ' ' ? 16 : cellW;
+        const drawX = cx; // capture NOW — img.onload fires later, after cx has moved on
         if(hwGlyphs[ch]){
           pending++;
           const img = new Image();
           img.onload = ()=>{
             const scale = Math.min(cellW / img.naturalWidth, cellH / img.naturalHeight);
             const dw = img.naturalWidth * scale, dh = img.naturalHeight * scale;
-            ctx.drawImage(img, cx + (cellW-dw)/2, cy - dh/2, dw, dh);
+            ctx.drawImage(img, drawX + (cellW-dw)/2, cy - dh/2, dw, dh);
             pending--; finishIfReady();
           };
           img.onerror = ()=>{ pending--; finishIfReady(); };
