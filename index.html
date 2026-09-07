@@ -1,0 +1,679 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>OnlyChat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-deep:#0d0e26;
+    --bg-mid:#181a44;
+    --bg-panel:#14163a;
+    --violet:#7c5cff;
+    --violet-soft:#a78bfa;
+    --mint:#3fd6b0;
+    --coral:#ff6f91;
+    --text-hi:#f3f2ff;
+    --text-lo:#9ea0c9;
+    --line:#2a2c5e;
+    --danger:#ff5c72;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;margin:0;}
+  body{
+    font-family:'Quicksand',sans-serif;
+    background:radial-gradient(circle at 20% 0%, #23255e 0%, var(--bg-deep) 55%);
+    color:var(--text-hi);
+    overflow:hidden;
+    -webkit-tap-highlight-color:transparent;
+  }
+  h1,h2,h3,.brand{font-family:'Poppins',sans-serif;}
+  button{font-family:inherit;}
+  #app{position:fixed;inset:0;display:flex;flex-direction:column;}
+
+  /* ---------- shared screen scaffolding ---------- */
+  .screen{position:absolute;inset:0;display:flex;flex-direction:column;
+    opacity:0;pointer-events:none;transition:opacity .18s ease;}
+  .screen.active{opacity:1;pointer-events:auto;}
+
+  /* ---------- auth ---------- */
+  #authScreen{align-items:center;justify-content:center;padding:32px 24px;text-align:center;}
+  .brandmark{font-size:34px;font-weight:700;letter-spacing:.5px;margin-bottom:4px;
+    background:linear-gradient(90deg,var(--violet-soft),var(--mint));
+    -webkit-background-clip:text;background-clip:text;color:transparent;}
+  .tagline{color:var(--text-lo);font-size:14px;margin-bottom:34px;}
+  .authCard{width:100%;max-width:340px;background:var(--bg-panel);border:1px solid var(--line);
+    border-radius:20px;padding:26px 22px;box-shadow:0 20px 50px rgba(0,0,0,.35);}
+  .authCard h2{font-size:19px;margin:0 0 18px;font-weight:600;}
+  .field{text-align:left;margin-bottom:14px;}
+  .field label{display:block;font-size:12px;color:var(--text-lo);margin-bottom:6px;}
+  .field input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);
+    background:#0f1130;color:var(--text-hi);font-size:15px;font-family:'Quicksand',sans-serif;}
+  .field input:focus{outline:none;border-color:var(--violet-soft);}
+  .hint{font-size:11px;color:var(--text-lo);margin-top:6px;line-height:1.5;}
+  .primaryBtn{width:100%;padding:13px;border:none;border-radius:12px;
+    background:linear-gradient(90deg,var(--violet),#5c3dfa);color:#fff;font-weight:600;
+    font-size:15px;margin-top:6px;cursor:pointer;}
+  .primaryBtn:active{transform:scale(.98);}
+  .switchAuth{margin-top:16px;font-size:13px;color:var(--text-lo);}
+  .switchAuth a{color:var(--violet-soft);text-decoration:none;font-weight:600;}
+  .authError{color:var(--danger);font-size:12.5px;margin-top:10px;min-height:14px;}
+
+  /* ---------- top app bar (chat list / requests) ---------- */
+  .appbar{display:flex;align-items:center;justify-content:space-between;
+    padding:16px 18px 12px;border-bottom:1px solid var(--line);flex-shrink:0;}
+  .appbar h1{font-size:20px;margin:0;font-weight:600;}
+  .iconBtn{width:36px;height:36px;border-radius:50%;border:none;background:var(--bg-panel);
+    color:var(--text-hi);display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  .iconBtn svg{width:18px;height:18px;fill:currentColor;}
+  .tabs{display:flex;gap:6px;padding:10px 18px;flex-shrink:0;}
+  .tabBtn{flex:1;padding:9px 0;border-radius:999px;border:1px solid var(--line);
+    background:transparent;color:var(--text-lo);font-size:13px;font-weight:600;
+    display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;}
+  .tabBtn.active{background:var(--violet);border-color:var(--violet);color:#fff;}
+  .badge{background:var(--coral);color:#fff;border-radius:999px;font-size:10px;
+    min-width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;
+    padding:0 4px;}
+
+  /* ---------- chat list ---------- */
+  #chatListScreen .listWrap, #requestsScreen .listWrap{flex:1;overflow-y:auto;padding:6px 10px 90px;}
+  .chatRow{display:flex;align-items:center;gap:12px;padding:12px;border-radius:16px;
+    cursor:pointer;}
+  .chatRow:active{background:var(--bg-panel);}
+  .avatar{width:46px;height:46px;border-radius:50%;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;
+    color:#fff;background:linear-gradient(135deg,var(--violet),var(--coral));}
+  .chatMeta{flex:1;min-width:0;}
+  .chatMeta .top{display:flex;justify-content:space-between;align-items:baseline;}
+  .chatMeta .name{font-weight:600;font-size:15px;}
+  .chatMeta .time{font-size:11px;color:var(--text-lo);}
+  .chatMeta .preview{font-size:13px;color:var(--text-lo);white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis;}
+  .emptyState{padding:60px 30px;text-align:center;color:var(--text-lo);}
+  .emptyState svg{width:52px;height:52px;fill:var(--line);margin-bottom:14px;}
+
+  .fab{position:absolute;right:20px;bottom:26px;width:56px;height:56px;border-radius:50%;
+    background:linear-gradient(135deg,var(--violet),var(--mint));border:none;color:#fff;
+    display:flex;align-items:center;justify-content:center;box-shadow:0 10px 24px rgba(124,92,255,.45);
+    cursor:pointer;}
+  .fab svg{width:24px;height:24px;fill:#fff;}
+
+  /* ---------- request rows ---------- */
+  .reqRow{padding:14px;border-radius:16px;background:var(--bg-panel);margin-bottom:10px;}
+  .reqTop{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+  .reqTop .name{font-weight:600;font-size:15px;flex:1;}
+  .reqPreview{font-size:13px;color:var(--text-lo);margin:0 0 12px 58px;}
+  .reqActions{display:flex;gap:10px;margin-left:58px;}
+  .reqBtn{flex:1;padding:9px 0;border-radius:10px;border:none;font-weight:600;font-size:13px;cursor:pointer;}
+  .reqBtn.accept{background:var(--mint);color:#062;}
+  .reqBtn.decline{background:rgba(255,92,114,.15);color:var(--danger);}
+
+  /* ---------- chat thread ---------- */
+  #chatScreen{background:radial-gradient(circle at 80% 0%, #22245e 0%, var(--bg-deep) 60%);}
+  .threadBar{display:flex;align-items:center;gap:10px;padding:14px 14px;
+    border-bottom:1px solid var(--line);flex-shrink:0;}
+  .threadBar .name{font-weight:600;font-size:15px;flex:1;}
+  .threadBar .status{font-size:11px;color:var(--mint);display:block;}
+  .msgs{flex:1;overflow-y:auto;padding:16px 14px;display:flex;flex-direction:column;gap:10px;}
+  .bubbleRow{display:flex;}
+  .bubbleRow.me{justify-content:flex-end;}
+  .bubble{max-width:75%;padding:10px 14px;border-radius:18px;font-size:14.5px;line-height:1.45;
+    position:relative;word-break:break-word;}
+  .bubbleRow.me .bubble{background:linear-gradient(135deg,var(--violet),#5c3dfa);
+    color:#fff;border-bottom-right-radius:5px;}
+  .bubbleRow.them .bubble{background:var(--bg-panel);border:1px solid var(--line);
+    border-bottom-left-radius:5px;}
+  .bubble img{max-width:100%;border-radius:12px;display:block;margin-top:4px;}
+  .bubble .stamp{display:block;font-size:10px;opacity:.65;margin-top:4px;text-align:right;}
+  .composer{display:flex;align-items:flex-end;gap:8px;padding:10px 12px;
+    border-top:1px solid var(--line);flex-shrink:0;}
+  .composer textarea{flex:1;resize:none;max-height:100px;border-radius:18px;border:1px solid var(--line);
+    background:var(--bg-panel);color:var(--text-hi);padding:11px 14px;font-size:14.5px;
+    font-family:'Quicksand',sans-serif;}
+  .composer textarea:focus{outline:none;border-color:var(--violet-soft);}
+  .roundBtn{width:42px;height:42px;border-radius:50%;border:none;flex-shrink:0;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;}
+  .roundBtn.send{background:var(--violet);color:#fff;}
+  .roundBtn.attach{background:var(--bg-panel);color:var(--text-hi);border:1px solid var(--line);}
+  .roundBtn svg{width:19px;height:19px;fill:currentColor;}
+  .lockedNotice{margin:auto;text-align:center;color:var(--text-lo);font-size:13px;padding:30px;}
+
+  /* ---------- settings ---------- */
+  #settingsScreen .listWrap{flex:1;overflow-y:auto;padding:18px;}
+  .settingsCard{background:var(--bg-panel);border:1px solid var(--line);border-radius:16px;
+    padding:16px;margin-bottom:14px;}
+  .settingsCard h3{margin:0 0 4px;font-size:14px;}
+  .settingsCard p{margin:0 0 12px;font-size:12.5px;color:var(--text-lo);line-height:1.5;}
+  .radioRow{display:flex;align-items:center;gap:10px;padding:9px 0;font-size:14px;cursor:pointer;}
+  .radioRow input{accent-color:var(--violet);width:17px;height:17px;}
+  .myUsername{font-size:13px;color:var(--text-lo);margin-bottom:18px;}
+  .myUsername b{color:var(--text-hi);}
+  .logoutBtn{width:100%;padding:12px;border-radius:12px;border:1px solid var(--danger);
+    background:transparent;color:var(--danger);font-weight:600;cursor:pointer;}
+
+  /* ---------- new chat modal ---------- */
+  .modalOverlay{position:fixed;inset:0;background:rgba(6,7,20,.6);display:flex;
+    align-items:flex-end;z-index:50;opacity:0;pointer-events:none;transition:opacity .15s;}
+  .modalOverlay.show{opacity:1;pointer-events:auto;}
+  .modalSheet{width:100%;background:var(--bg-panel);border-radius:22px 22px 0 0;padding:22px 20px 28px;
+    transform:translateY(12px);transition:transform .18s;}
+  .modalOverlay.show .modalSheet{transform:translateY(0);}
+  .modalSheet h3{margin:0 0 14px;font-size:16px;}
+  .toastMsg{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);
+    background:#1c1e4a;border:1px solid var(--line);color:var(--text-hi);
+    padding:10px 18px;border-radius:999px;font-size:13px;z-index:99;opacity:0;
+    transition:opacity .2s;pointer-events:none;}
+  .toastMsg.show{opacity:1;}
+  .spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);
+    border-top-color:#fff;border-radius:50%;display:inline-block;
+    animation:spin .7s linear infinite;vertical-align:-3px;margin-right:6px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- AUTH -->
+  <div class="screen active" id="authScreen">
+    <div class="brandmark">OnlyChat</div>
+    <div class="tagline">No number. No email. Just a name.</div>
+
+    <div class="authCard" id="loginCard">
+      <h2>Log in</h2>
+      <div class="field"><label>Username</label><input id="loginUser" autocomplete="off" placeholder="e.g. midnight_fox"></div>
+      <div class="field"><label>Password</label><input id="loginPass" type="password" placeholder="••••••••"></div>
+      <button class="primaryBtn" id="loginBtn">Log in</button>
+      <div class="authError" id="loginErr"></div>
+      <div class="switchAuth">New here? <a id="goSignup">Create an ID</a></div>
+    </div>
+
+    <div class="authCard" id="signupCard" style="display:none;">
+      <h2>Create your ID</h2>
+      <div class="field"><label>Choose a username</label><input id="suUser" autocomplete="off" placeholder="letters, numbers, _"></div>
+      <div class="field"><label>Choose a password</label><input id="suPass" type="password" placeholder="min 6 characters"></div>
+      <div class="hint">No email or phone needed — just remember this username and password. There's no "forgot password" recovery, so keep it safe.</div>
+      <button class="primaryBtn" id="signupBtn" style="margin-top:14px;">Create ID</button>
+      <div class="authError" id="signupErr"></div>
+      <div class="switchAuth">Already have an ID? <a id="goLogin">Log in</a></div>
+    </div>
+  </div>
+
+  <!-- CHAT LIST -->
+  <div class="screen" id="chatListScreen">
+    <div class="appbar">
+      <h1>Chats</h1>
+      <button class="iconBtn" id="openSettings"><svg viewBox="0 0 24 24"><path d="M19.14 12.94a7.14 7.14 0 000-1.88l2.03-1.58a.5.5 0 00.12-.64l-1.92-3.32a.5.5 0 00-.6-.22l-2.39.96a7.2 7.2 0 00-1.62-.94l-.36-2.54a.5.5 0 00-.5-.42h-3.84a.5.5 0 00-.5.42l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.5.5 0 00-.6.22L2.71 8.84a.5.5 0 00.12.64l2.03 1.58a7.14 7.14 0 000 1.88l-2.03 1.58a.5.5 0 00-.12.64l1.92 3.32c.14.24.42.32.6.22l2.39-.96c.49.38 1.03.7 1.62.94l.36 2.54c.05.24.26.42.5.42h3.84c.24 0 .45-.18.5-.42l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.24.1.46 0 .6-.22l1.92-3.32a.5.5 0 00-.12-.64l-2.03-1.58zM12 15.5A3.5 3.5 0 1112 8.5a3.5 3.5 0 010 7z"/></svg></button>
+    </div>
+    <div class="tabs">
+      <button class="tabBtn active" data-tab="chats">Chats</button>
+      <button class="tabBtn" data-tab="requests">Requests <span class="badge" id="reqBadge" style="display:none;">0</span></button>
+    </div>
+    <div class="listWrap" id="chatListWrap"></div>
+    <button class="fab" id="newChatFab"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg></button>
+  </div>
+
+  <!-- REQUESTS -->
+  <div class="screen" id="requestsScreen">
+    <div class="appbar">
+      <button class="iconBtn" id="backFromRequests"><svg viewBox="0 0 24 24"><path d="M15.5 4.5L8 12l7.5 7.5" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg></button>
+      <h1>Message requests</h1>
+      <span style="width:36px;"></span>
+    </div>
+    <div class="listWrap" id="reqListWrap"></div>
+  </div>
+
+  <!-- CHAT THREAD -->
+  <div class="screen" id="chatScreen">
+    <div class="threadBar">
+      <button class="iconBtn" id="backFromChat"><svg viewBox="0 0 24 24"><path d="M15.5 4.5L8 12l7.5 7.5" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg></button>
+      <div class="avatar" id="threadAvatar" style="width:38px;height:38px;font-size:14px;"></div>
+      <div style="flex:1;">
+        <div class="name" id="threadName"></div>
+        <span class="status" id="threadStatus"></span>
+      </div>
+    </div>
+    <div class="msgs" id="msgsWrap"></div>
+    <div class="composer" id="composerWrap">
+      <button class="roundBtn attach" id="attachBtn">
+        <svg viewBox="0 0 24 24"><path d="M16.5 6.5v9a4.5 4.5 0 01-9 0v-10a3 3 0 016 0v9a1.5 1.5 0 01-3 0v-8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+      <input type="file" id="fileInput" accept="image/*" style="display:none;">
+      <textarea id="msgInput" rows="1" placeholder="Type a message…"></textarea>
+      <button class="roundBtn send" id="sendBtn"><svg viewBox="0 0 24 24"><path d="M3 11l18-8-8 18-2.5-7L3 11z"/></svg></button>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="screen" id="settingsScreen">
+    <div class="appbar">
+      <button class="iconBtn" id="backFromSettings"><svg viewBox="0 0 24 24"><path d="M15.5 4.5L8 12l7.5 7.5" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg></button>
+      <h1>Settings</h1>
+      <span style="width:36px;"></span>
+    </div>
+    <div class="listWrap">
+      <div class="myUsername">Logged in as <b id="myUsernameLabel"></b></div>
+      <div class="settingsCard">
+        <h3>Who can message me</h3>
+        <p>Control who your first message is allowed to come from.</p>
+        <label class="radioRow"><input type="radio" name="privacy" value="everyone"> Everyone</label>
+        <label class="radioRow"><input type="radio" name="privacy" value="contacts"> Only people I already know</label>
+      </div>
+      <button class="logoutBtn" id="logoutBtn">Log out</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- NEW CHAT MODAL -->
+<div class="modalOverlay" id="newChatModal">
+  <div class="modalSheet">
+    <h3>Message someone</h3>
+    <div class="field"><label>Their username</label><input id="newChatUser" autocomplete="off" placeholder="e.g. sunny_days"></div>
+    <div class="authError" id="newChatErr"></div>
+    <button class="primaryBtn" id="newChatGo">Start chat</button>
+  </div>
+</div>
+
+<div class="toastMsg" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+/* ====================== FIREBASE CONFIG ======================
+   Paste YOUR OWN project's config here (Firebase Console →
+   Project settings → General → Your apps → SDK setup). See the
+   setup guide sent alongside this file for the exact steps.
+================================================================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyB33sJZX5FoRgVaNO7hphtgPQO3P1Ojqv0",
+  authDomain: "onlychat-b7bea.firebaseapp.com",
+  projectId: "onlychat-b7bea",
+  storageBucket: "onlychat-b7bea.firebasestorage.app",
+  messagingSenderId: "160674354933",
+  appId: "1:160674354933:web:bab7bc6ecd5e00ff7b97bc"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+auth.setPersistence(firebase.auth.Auth.Persistence.NONE).catch(()=>{});
+const db = firebase.firestore();
+const FAKE_DOMAIN = "onlychat.local";
+
+function withTimeout(promise, ms, msg){
+  return Promise.race([
+    promise,
+    new Promise((_,rej)=> setTimeout(()=> rej(new Error(msg)), ms))
+  ]);
+}
+
+/* ---------------- helpers ---------------- */
+function $(id){ return document.getElementById(id); }
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  $(id).classList.add('active');
+}
+function toast(msg){
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toast._t); toast._t = setTimeout(()=>t.classList.remove('show'), 2200);
+}
+function initialsAvatar(name){ return (name||'?').slice(0,1).toUpperCase(); }
+function chatIdFor(a,b){ return [a,b].sort().join('_'); }
+function fmtTime(ms){
+  if(!ms) return '';
+  const d = new Date(ms);
+  return d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+}
+function validUsername(u){ return /^[a-zA-Z0-9_]{3,20}$/.test(u); }
+
+let me = null;           // firebase auth user
+let myProfile = null;    // {username, privacy, contacts, blocked}
+let chatListUnsub = null, reqUnsub = null, threadUnsub = null;
+let activeChatId = null, activeOtherUid = null, activeOtherName = null;
+
+/* ---------------- auth: signup ---------------- */
+$('goSignup').onclick = ()=>{ $('loginCard').style.display='none'; $('signupCard').style.display='block'; };
+$('goLogin').onclick  = ()=>{ $('signupCard').style.display='none'; $('loginCard').style.display='block'; };
+
+$('signupBtn').onclick = async ()=>{
+  const uname = $('suUser').value.trim();
+  const pass = $('suPass').value;
+  const err = $('signupErr'); err.textContent = '';
+  if(!validUsername(uname)){ err.textContent = 'Username must be 3-20 letters/numbers/underscore.'; return; }
+  if(pass.length < 6){ err.textContent = 'Password must be at least 6 characters.'; return; }
+  $('signupBtn').disabled = true; $('signupBtn').innerHTML = '<span class="spinner"></span>Creating…';
+  try{
+    const unameLower = uname.toLowerCase();
+    const takenDoc = await withTimeout(
+      db.collection('usernames').doc(unameLower).get(),
+      10000, 'timeout: checking username availability'
+    );
+    if(takenDoc.exists){ err.textContent = 'That username is already taken.'; return; }
+    const cred = await withTimeout(
+      auth.createUserWithEmailAndPassword(unameLower+'@'+FAKE_DOMAIN, pass),
+      10000, 'timeout: creating account'
+    );
+    const uid = cred.user.uid;
+    await withTimeout(
+      db.collection('usernames').doc(unameLower).set({ uid }),
+      10000, 'timeout: reserving username'
+    );
+    await withTimeout(
+      db.collection('users').doc(uid).set({
+        username: uname, usernameLower: unameLower, privacy: 'everyone',
+        contacts: [], blocked: [], createdAt: Date.now()
+      }),
+      10000, 'timeout: saving profile'
+    );
+    toast('Welcome, ' + uname + '!');
+  }catch(e){
+    err.textContent = e.message.replace('Firebase: ','');
+  }finally{
+    $('signupBtn').disabled = false; $('signupBtn').textContent = 'Create ID';
+  }
+};
+
+/* ---------------- auth: login ---------------- */
+$('loginBtn').onclick = async ()=>{
+  const uname = $('loginUser').value.trim().toLowerCase();
+  const pass = $('loginPass').value;
+  const err = $('loginErr'); err.textContent = '';
+  if(!uname || !pass){ err.textContent = 'Enter your username and password.'; return; }
+  $('loginBtn').disabled = true; $('loginBtn').innerHTML = '<span class="spinner"></span>Logging in…';
+  try{
+    await withTimeout(
+      auth.signInWithEmailAndPassword(uname+'@'+FAKE_DOMAIN, pass),
+      10000, 'timeout'
+    );
+  }catch(e){
+    err.textContent = (e.message === 'timeout')
+      ? 'Taking too long — please try opening this page as a regular file (not from within another app) and try again.'
+      : 'Incorrect username or password.';
+  }finally{
+    $('loginBtn').disabled = false; $('loginBtn').textContent = 'Log in';
+  }
+};
+
+$('logoutBtn').onclick = ()=>{ auth.signOut(); };
+
+/* ---------------- auth state ---------------- */
+auth.onAuthStateChanged(async (user)=>{
+  if(chatListUnsub) chatListUnsub(); if(reqUnsub) reqUnsub(); if(threadUnsub) threadUnsub();
+  if(!user){ me = null; myProfile = null; showScreen('authScreen'); return; }
+  me = user;
+  let snap = await db.collection('users').doc(user.uid).get();
+  if(!snap.exists){
+    // Interrupted signup: the auth account exists but the Firestore profile
+    // never got written (e.g. a slow/dropped connection right after signup).
+    // Recreate the missing profile instead of silently signing out.
+    const unameLower = user.email.split('@')[0];
+    try{
+      const takenDoc = await db.collection('usernames').doc(unameLower).get();
+      if(takenDoc.exists && takenDoc.data().uid !== user.uid){
+        // username somehow claimed by a different account — can't recover safely
+        toast('Something went wrong with this account. Please contact support.');
+        auth.signOut();
+        return;
+      }
+      await db.collection('usernames').doc(unameLower).set({ uid: user.uid });
+      await db.collection('users').doc(user.uid).set({
+        username: unameLower, usernameLower: unameLower, privacy: 'everyone',
+        contacts: [], blocked: [], createdAt: Date.now()
+      });
+      snap = await db.collection('users').doc(user.uid).get();
+      toast('Finished setting up your account.');
+    }catch(e){
+      toast('Could not restore your account — check your connection and try logging in again.');
+      auth.signOut();
+      return;
+    }
+  }
+  myProfile = snap.data();
+  $('myUsernameLabel').textContent = myProfile.username;
+  document.querySelectorAll('input[name=privacy]').forEach(r=>{
+    r.checked = (r.value === (myProfile.privacy||'everyone'));
+    r.onchange = async ()=>{
+      await db.collection('users').doc(me.uid).update({ privacy: r.value });
+      myProfile.privacy = r.value;
+      toast('Privacy setting updated.');
+    };
+  });
+  showScreen('chatListScreen');
+  listenChatList();
+  listenRequests();
+});
+
+/* ---------------- tabs ---------------- */
+document.querySelectorAll('.tabBtn').forEach(btn=>{
+  btn.onclick = ()=>{
+    document.querySelectorAll('.tabBtn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    if(btn.dataset.tab === 'requests') showScreen('requestsScreen');
+    else showScreen('chatListScreen');
+  };
+});
+$('backFromRequests').onclick = ()=>{
+  document.querySelector('.tabBtn[data-tab=chats]').classList.add('active');
+  document.querySelector('.tabBtn[data-tab=requests]').classList.remove('active');
+  showScreen('chatListScreen');
+};
+$('openSettings').onclick = ()=> showScreen('settingsScreen');
+$('backFromSettings').onclick = ()=> showScreen('chatListScreen');
+$('backFromChat').onclick = ()=>{ if(threadUnsub) threadUnsub(); showScreen('chatListScreen'); };
+
+/* ---------------- chat list (accepted chats) ---------------- */
+function listenChatList(){
+  chatListUnsub = db.collection('chats')
+    .where('participants', 'array-contains', me.uid)
+    .onSnapshot(snap=>{
+      const rows = [];
+      snap.forEach(doc=>{
+        const c = doc.data();
+        if(c.requestStatus !== 'accepted') return;
+        rows.push(Object.assign({id:doc.id}, c));
+      });
+      rows.sort((a,b)=> (b.lastTime||0) - (a.lastTime||0));
+      renderChatList(rows);
+    }, e=> console.error('chatlist', e));
+}
+function renderChatList(rows){
+  const wrap = $('chatListWrap');
+  if(rows.length === 0){
+    wrap.innerHTML = '<div class="emptyState"><svg viewBox="0 0 24 24"><path d="M4 4h16v12H7l-3 3V4z"/></svg><div>No chats yet.<br>Tap + to message someone.</div></div>';
+    return;
+  }
+  wrap.innerHTML = '';
+  rows.forEach(c=>{
+    const otherUid = c.participants.find(p=>p!==me.uid);
+    const otherName = c.usernames ? c.usernames[otherUid] : '?';
+    const row = document.createElement('div');
+    row.className = 'chatRow';
+    row.innerHTML = `<div class="avatar">${initialsAvatar(otherName)}</div>
+      <div class="chatMeta">
+        <div class="top"><span class="name">${escapeHtml(otherName)}</span><span class="time">${fmtTime(c.lastTime)}</span></div>
+        <div class="preview">${escapeHtml(c.lastMessageType==='image' ? '📷 Photo' : (c.lastMessage||''))}</div>
+      </div>`;
+    row.onclick = ()=> openChat(c.id, otherUid, otherName);
+    wrap.appendChild(row);
+  });
+}
+function escapeHtml(s){
+  return String(s||'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+/* ---------------- requests (pending, I'm the recipient) ---------------- */
+function listenRequests(){
+  reqUnsub = db.collection('chats')
+    .where('participants', 'array-contains', me.uid)
+    .onSnapshot(snap=>{
+      const rows = [];
+      snap.forEach(doc=>{
+        const c = doc.data();
+        if(c.requestStatus === 'pending' && c.requestFrom !== me.uid) rows.push(Object.assign({id:doc.id}, c));
+      });
+      $('reqBadge').style.display = rows.length ? 'inline-flex' : 'none';
+      $('reqBadge').textContent = rows.length;
+      renderRequests(rows);
+    }, e=> console.error('requests', e));
+}
+function renderRequests(rows){
+  const wrap = $('reqListWrap');
+  if(rows.length === 0){
+    wrap.innerHTML = '<div class="emptyState"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20z"/></svg><div>No pending requests.</div></div>';
+    return;
+  }
+  wrap.innerHTML = '';
+  rows.forEach(c=>{
+    const otherUid = c.requestFrom;
+    const otherName = c.usernames ? c.usernames[otherUid] : '?';
+    const row = document.createElement('div');
+    row.className = 'reqRow';
+    row.innerHTML = `<div class="reqTop"><div class="avatar">${initialsAvatar(otherName)}</div><span class="name">${escapeHtml(otherName)}</span></div>
+      <div class="reqPreview">${escapeHtml(c.lastMessageType==='image' ? '📷 sent a photo' : c.lastMessage||'')}</div>
+      <div class="reqActions">
+        <button class="reqBtn decline">No, block</button>
+        <button class="reqBtn accept">Yes, I know them</button>
+      </div>`;
+    row.querySelector('.accept').onclick = ()=> respondRequest(c.id, otherUid, true);
+    row.querySelector('.decline').onclick = ()=> respondRequest(c.id, otherUid, false);
+    wrap.appendChild(row);
+  });
+}
+async function respondRequest(chatId, otherUid, accept){
+  if(accept){
+    await db.collection('chats').doc(chatId).update({ requestStatus: 'accepted' });
+    await db.collection('users').doc(me.uid).update({
+      contacts: firebase.firestore.FieldValue.arrayUnion(otherUid)
+    });
+    toast('Added to your chats.');
+  }else{
+    await db.collection('users').doc(me.uid).update({
+      blocked: firebase.firestore.FieldValue.arrayUnion(otherUid)
+    });
+    await db.collection('chats').doc(chatId).delete();
+    toast('Blocked. They can\'t message you again.');
+  }
+}
+
+/* ---------------- starting a new chat ---------------- */
+$('newChatFab').onclick = ()=>{ $('newChatUser').value=''; $('newChatErr').textContent=''; $('newChatModal').classList.add('show'); };
+$('newChatModal').onclick = (e)=>{ if(e.target.id === 'newChatModal') $('newChatModal').classList.remove('show'); };
+
+$('newChatGo').onclick = async ()=>{
+  const uname = $('newChatUser').value.trim().toLowerCase();
+  const err = $('newChatErr'); err.textContent = '';
+  if(!uname){ err.textContent = 'Enter a username.'; return; }
+  if(uname === myProfile.usernameLower){ err.textContent = "That's your own username."; return; }
+  $('newChatGo').disabled = true;
+  try{
+    const unameDoc = await db.collection('usernames').doc(uname).get();
+    if(!unameDoc.exists){ err.textContent = 'No user with that username.'; return; }
+    const otherUid = unameDoc.data().uid;
+    const otherSnap = await db.collection('users').doc(otherUid).get();
+    const other = otherSnap.data();
+    if((other.blocked||[]).includes(me.uid)){ err.textContent = 'This person is not accepting your messages.'; return; }
+
+    const cid = chatIdFor(me.uid, otherUid);
+    const existing = await db.collection('chats').doc(cid).get();
+    const isKnown = (other.contacts||[]).includes(me.uid) || (existing.exists && existing.data().requestStatus==='accepted');
+    const status = (other.privacy === 'contacts' && !isKnown) ? 'pending' : 'accepted';
+
+    if(!existing.exists){
+      await db.collection('chats').doc(cid).set({
+        participants: [me.uid, otherUid],
+        usernames: { [me.uid]: myProfile.username, [otherUid]: other.username },
+        requestStatus: status,
+        requestFrom: me.uid,
+        lastMessage: '', lastMessageType: 'text', lastTime: Date.now()
+      });
+    }
+    $('newChatModal').classList.remove('show');
+    openChat(cid, otherUid, other.username);
+  }catch(e){
+    err.textContent = 'Something went wrong. Try again.';
+  }finally{
+    $('newChatGo').disabled = false;
+  }
+};
+
+/* ---------------- chat thread ---------------- */
+function openChat(chatId, otherUid, otherName){
+  activeChatId = chatId; activeOtherUid = otherUid; activeOtherName = otherName;
+  $('threadName').textContent = otherName;
+  $('threadAvatar').textContent = initialsAvatar(otherName);
+  $('threadStatus').textContent = '';
+  $('msgsWrap').innerHTML = '';
+  showScreen('chatScreen');
+  if(threadUnsub) threadUnsub();
+
+  db.collection('chats').doc(chatId).get().then(doc=>{
+    const c = doc.data();
+    const pending = c.requestStatus === 'pending';
+    const iAmRecipient = pending && c.requestFrom !== me.uid;
+    $('composerWrap').style.display = iAmRecipient ? 'none' : 'flex';
+    $('threadStatus').textContent = pending
+      ? (iAmRecipient ? 'Message request — respond from the Requests tab' : 'Waiting for them to accept your message')
+      : '';
+  });
+
+  threadUnsub = db.collection('chats').doc(chatId).collection('messages')
+    .orderBy('time', 'asc')
+    .onSnapshot(snap=>{
+      const wrap = $('msgsWrap');
+      wrap.innerHTML = '';
+      snap.forEach(doc=>{
+        const m = doc.data();
+        const row = document.createElement('div');
+        row.className = 'bubbleRow ' + (m.from === me.uid ? 'me' : 'them');
+        let inner = '';
+        if(m.type === 'image'){ inner = `<img src="${m.imageData}">`; }
+        else { inner = escapeHtml(m.text); }
+        row.innerHTML = `<div class="bubble">${inner}<span class="stamp">${fmtTime(m.time)}</span></div>`;
+        wrap.appendChild(row);
+      });
+      wrap.scrollTop = wrap.scrollHeight;
+    });
+}
+
+async function sendMessage(payload){
+  const cid = activeChatId;
+  await db.collection('chats').doc(cid).collection('messages').add(Object.assign({
+    from: me.uid, time: Date.now()
+  }, payload));
+  await db.collection('chats').doc(cid).update({
+    lastMessage: payload.type === 'image' ? '' : payload.text,
+    lastMessageType: payload.type,
+    lastTime: Date.now()
+  });
+}
+
+$('sendBtn').onclick = async ()=>{
+  const box = $('msgInput');
+  const text = box.value.trim();
+  if(!text) return;
+  box.value = '';
+  await sendMessage({ type: 'text', text });
+};
+$('msgInput').addEventListener('keydown', e=>{
+  if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); $('sendBtn').click(); }
+});
+$('msgInput').addEventListener('input', function(){
+  this.style.height = 'auto'; this.style.height = Math.min(100, this.scrollHeight) + 'px';
+});
+
+$('attachBtn').onclick = ()=> $('fileInput').click();
+$('fileInput').addEventListener('change', function(){
+  const file = this.files[0];
+  if(!file) return;
+  if(file.size > 900*1024){ toast('Photo too large — please pick one under ~900KB.'); this.value=''; return; }
+  const reader = new FileReader();
+  reader.onload = async ()=>{
+    await sendMessage({ type: 'image', imageData: reader.result });
+  };
+  reader.readAsDataURL(file);
+  this.value = '';
+});
+</script>
+</body>
+</html>
