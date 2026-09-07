@@ -23,9 +23,15 @@
   /* ===== chat themes: each theme restyles the chat thread's background,
      fonts, bubble shapes AND adds decorative layers (patterns/textures),
      while login/list/settings stay on the safe base palette. ===== */
-  body[data-theme="sunset"]{--violet:#a855f7;--violet-soft:#c084fc;--mint:#38bdf8;--coral:#fb7185;}
-  body[data-theme="sunset"] #chatScreen{background:linear-gradient(180deg,#2b1055 0%,#611b6b 45%,#c74b6b 78%,#f2994a 100%);}
-  body[data-theme="sunset"] #chatScreen::before{content:'';position:absolute;inset:0;pointer-events:none;z-index:0;
+  /* ===== 1. Floating Bubble — chats float like little glowing bubbles
+     over a night-sunset backdrop; bubble fill stays translucent, the
+     colour lives in the outline + soft glow, not a solid block. ===== */
+  body[data-theme="bubble"]{--violet:#8b5cf6;--violet-soft:#b39dff;--mint:#22c55e;--coral:#f2c94c;}
+  body[data-theme="bubble"]{ --wallpaper-bubble: none; }
+  body[data-theme="bubble"] #chatScreen{
+    background: var(--wallpaper-bubble), linear-gradient(180deg,#141a3d 0%,#241b4d 38%,#4d2a5c 70%,#7a3b56 100%);
+    background-size:cover; background-position:center;}
+  body[data-theme="bubble"] #chatScreen::before{content:'';position:absolute;inset:0;pointer-events:none;z-index:0;
     background-image:
       radial-gradient(1.6px 1.6px at 18% 10%, #fff, transparent),
       radial-gradient(1.6px 1.6px at 58% 7%, #fff, transparent),
@@ -33,19 +39,41 @@
       radial-gradient(1.4px 1.4px at 34% 20%, #fff, transparent),
       radial-gradient(1px 1px at 90% 6%, #fff, transparent);
     opacity:.65;}
-  body[data-theme="sunset"] #chatScreen::after{content:'';position:absolute;left:0;right:0;bottom:0;height:90px;pointer-events:none;z-index:0;
+  body[data-theme="bubble"] #chatScreen::after{content:'';position:absolute;left:0;right:0;bottom:0;height:90px;pointer-events:none;z-index:0;
     background:linear-gradient(180deg, transparent, rgba(8,4,16,.55));}
-  body[data-theme="sunset"] .threadBar, body[data-theme="sunset"] .composer{background:rgba(10,5,20,.28);backdrop-filter:blur(4px);}
-  body[data-theme="sunset"] .bubble{backdrop-filter:blur(6px);box-shadow:0 4px 18px rgba(0,0,0,.25);position:relative;z-index:1;}
-  body[data-theme="sunset"] .bubbleRow.me .bubble{background:rgba(255,255,255,.16)!important;border:1.5px solid rgba(255,255,255,.4);color:#fff;}
-  body[data-theme="sunset"] .bubbleRow.them .bubble{background:rgba(15,8,30,.4)!important;border:1.5px solid rgba(255,255,255,.22);}
+  body[data-theme="bubble"] .threadBar, body[data-theme="bubble"] .composer{background:rgba(10,5,20,.32);backdrop-filter:blur(6px);}
+  body[data-theme="bubble"] .msgs{gap:16px;}
+  body[data-theme="bubble"] .bubble{background:transparent!important;border-radius:26px!important;
+    padding:12px 18px;backdrop-filter:blur(3px);position:relative;z-index:1;
+    box-shadow:0 8px 22px rgba(0,0,0,.35);border-width:2.5px!important;border-style:solid!important;}
+  body[data-theme="bubble"] .bubbleRow.me .bubble{border-color:var(--violet-soft)!important;
+    background:rgba(139,92,246,.16)!important;color:#fff;
+    box-shadow:0 8px 22px rgba(139,92,246,.3),0 0 0 1px rgba(139,92,246,.15) inset;}
+  body[data-theme="bubble"] .bubbleRow.them .bubble{border-color:var(--mint)!important;
+    background:rgba(34,197,94,.12)!important;color:#fff;
+    box-shadow:0 8px 22px rgba(34,197,94,.25),0 0 0 1px rgba(34,197,94,.12) inset;}
 
+  /* ===== 2. Comic Strip — every message is its own comic panel: a
+     bordered frame, hard drop-shadow, and the sender's REAL profile
+     photo (not an illustration) sitting inside the panel next to the
+     speech bubble. ===== */
   body[data-theme="comic"]{--violet:#ff5da2;--violet-soft:#ff8ac0;--mint:#2ee6a6;--coral:#ffd166;}
   body[data-theme="comic"] #chatScreen{background:#151515;font-family:'Poppins',sans-serif;}
-  body[data-theme="comic"] #chatScreen .msgs{background-image:radial-gradient(rgba(255,255,255,.06) 1.4px, transparent 1.4px);background-size:15px 15px;}
+  body[data-theme="comic"] #chatScreen .msgs{background-image:radial-gradient(rgba(255,255,255,.06) 1.4px, transparent 1.4px);background-size:15px 15px;gap:14px;}
   body[data-theme="comic"] .threadBar{background:repeating-linear-gradient(135deg,#1c1c1c,#1c1c1c 9px,#242424 9px,#242424 18px);border-bottom:3px solid #111;}
   body[data-theme="comic"] .composer{background:#1c1c1c;border-top:3px solid #111;}
   body[data-theme="comic"] .avatar{border:3px solid #111;box-shadow:2px 2px 0 #111;overflow:hidden;}
+  /* the panel frame wrapping avatar + bubble for each message */
+  body[data-theme="comic"] .bubbleRow{align-items:flex-end;gap:10px;border:2.5px solid #111;
+    border-radius:12px;padding:10px;box-shadow:4px 4px 0 #111;}
+  body[data-theme="comic"] .bubbleRow.me{background:#2a2210;}
+  body[data-theme="comic"] .bubbleRow.them{background:#0f2028;}
+  body[data-theme="comic"] .bubbleAvatar{display:flex!important;width:48px;height:48px;border-radius:10px;
+    border:3px solid #111;box-shadow:2px 2px 0 #111;flex-shrink:0;font-size:16px;}
+  body[data-theme="comic"] .bubbleRow.me .bubbleAvatar{order:2;}
+  body[data-theme="comic"] .bubbleRow.me .bubble{order:1;}
+  body[data-theme="comic"] .bubbleRow.them .bubbleAvatar{order:0;}
+  body[data-theme="comic"] .bubbleRow.them .bubble{order:1;}
   body[data-theme="comic"] .bubble{font-weight:700;border:2.5px solid #111!important;box-shadow:3px 3px 0 #111;position:relative;z-index:1;}
   body[data-theme="comic"] .bubbleRow.me .bubble{background:#ffe98a!important;color:#171717!important;border-radius:16px 16px 4px 16px!important;box-shadow:-3px 3px 0 #111;}
   body[data-theme="comic"] .bubbleRow.them .bubble{background:#9ee6ff!important;color:#171717!important;border-radius:16px 16px 16px 4px!important;}
@@ -54,23 +82,49 @@
   body[data-theme="comic"] .bubbleRow.them .bubble::after{content:'';position:absolute;left:16px;bottom:-9px;width:0;height:0;
     border:9px solid transparent;border-top:11px solid #9ee6ff;border-bottom:0;filter:drop-shadow(2px 2px 0 #111);}
 
+  /* ===== 3. Handwritten Note — torn-paper scraps with a jagged edge,
+     slightly rotated like real sticky notes, plus a few doodle
+     flourishes (star, heart, paperclip) scattered in the background. ===== */
   body[data-theme="handwritten"]{--violet:#c2703d;--violet-soft:#dd9a68;--mint:#7fae6a;--coral:#d16b6b;}
   body[data-theme="handwritten"] #chatScreen{background:#241d12;font-family:'Kalam',cursive;}
+  body[data-theme="handwritten"] #chatScreen::before{content:'⭐ 📎 ★ ✦';position:absolute;top:14%;right:8%;
+    font-size:34px;opacity:.14;pointer-events:none;z-index:0;letter-spacing:22px;transform:rotate(8deg);}
+  body[data-theme="handwritten"] #chatScreen::after{content:'❤ ✎ ✦';position:absolute;bottom:22%;left:6%;
+    font-size:28px;opacity:.13;pointer-events:none;z-index:0;letter-spacing:20px;transform:rotate(-6deg);}
   body[data-theme="handwritten"] .threadBar{font-family:'Kalam',cursive;}
-  body[data-theme="handwritten"] #chatScreen .msgs{background-image:repeating-linear-gradient(rgba(255,255,255,.035) 0 27px, transparent 27px 28px);}
-  body[data-theme="handwritten"] .bubble{font-size:16.5px;border-radius:6px!important;box-shadow:0 3px 8px rgba(0,0,0,.35);}
-  body[data-theme="handwritten"] .bubbleRow.me .bubble{background:#f6e7c1!important;color:#3a2c14!important;transform:rotate(-1deg);}
-  body[data-theme="handwritten"] .bubbleRow.them .bubble{background:#e9f1e4!important;color:#2c3a1e!important;transform:rotate(1deg);}
+  body[data-theme="handwritten"] #chatScreen .msgs{background-image:repeating-linear-gradient(rgba(255,255,255,.035) 0 27px, transparent 27px 28px);position:relative;z-index:1;}
+  body[data-theme="handwritten"] .bubble{font-size:16.5px;border-radius:2px!important;box-shadow:0 4px 10px rgba(0,0,0,.4);
+    clip-path:polygon(0% 3%,5% 0%,15% 2%,28% 0%,42% 2.5%,56% 0%,70% 2%,84% 0%,95% 2%,100% 0%,
+      100% 97%,95% 100%,85% 98%,72% 100%,58% 97.5%,44% 100%,30% 98%,16% 100%,5% 98%,0% 100%);
+    padding:12px 16px;}
+  body[data-theme="handwritten"] .bubbleRow.me .bubble{background:#f6e7c1!important;color:#3a2c14!important;transform:rotate(-1.4deg);}
+  body[data-theme="handwritten"] .bubbleRow.them .bubble{background:#e9f1e4!important;color:#2c3a1e!important;transform:rotate(1.4deg);}
 
+  /* ===== 4. Character Chat — the thread sits on top of a full-bleed
+     photo/illustration backdrop (wallpaper dropped in later via
+     --wallpaper-character); bubbles float as glassy stickers, with a
+     little corner note-board like the reference image. ===== */
   body[data-theme="character"]{--violet:#8b5cf6;--violet-soft:#a78bfa;--mint:#22d3ee;--coral:#f472b6;}
-  body[data-theme="character"] #chatScreen{background:radial-gradient(circle at 30% 10%,#3a2360 0%,#160e2e 62%);}
+  body[data-theme="character"]{ --wallpaper-character: none; }
+  body[data-theme="character"] #chatScreen{
+    background: var(--wallpaper-character), radial-gradient(circle at 30% 10%,#3a2360 0%,#160e2e 62%);
+    background-size:cover; background-position:center;}
   body[data-theme="character"] #chatScreen::before{content:'';position:absolute;top:0;left:0;right:0;height:16px;pointer-events:none;z-index:0;
     background-image:repeating-radial-gradient(circle at 12px 7px, #ffe28a 0 2.5px, transparent 3.5px 26px);opacity:.85;}
+  body[data-theme="character"] #chatScreen::after{content:'✨ GOOD VIBES ONLY ✨';position:absolute;right:12px;bottom:82px;
+    background:#1c1430;color:#ffd23f;font-weight:700;font-size:9.5px;letter-spacing:.4px;line-height:1.4;
+    padding:10px 8px;border-radius:8px;transform:rotate(-4deg);box-shadow:0 8px 18px rgba(0,0,0,.45);
+    max-width:66px;text-align:center;z-index:0;}
+  body[data-theme="character"] .threadBar, body[data-theme="character"] .composer{background:rgba(10,6,22,.4);backdrop-filter:blur(6px);}
   body[data-theme="character"] .avatar{box-shadow:0 0 0 3px rgba(139,92,246,.55);}
-  body[data-theme="character"] .bubble{position:relative;z-index:1;}
-  body[data-theme="character"] .bubbleRow.me .bubble{background:linear-gradient(135deg,#8b5cf6,#f472b6)!important;}
-  body[data-theme="character"] .bubbleRow.them .bubble{background:rgba(255,255,255,.09)!important;backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.16);}
+  body[data-theme="character"] .bubble{position:relative;z-index:1;box-shadow:0 10px 22px rgba(0,0,0,.4);}
+  body[data-theme="character"] .bubbleRow.me .bubble{background:linear-gradient(135deg,#8b5cf6,#f472b6)!important;border-radius:22px 22px 6px 22px!important;}
+  body[data-theme="character"] .bubbleRow.them .bubble{background:rgba(20,10,35,.65)!important;backdrop-filter:blur(6px);
+    border:1px solid rgba(255,255,255,.22);border-radius:22px 22px 22px 6px!important;}
 
+  /* ===== 6. Doodle Drawing Chat — neon hand-drawn scribbles on black,
+     with a few doodle icons (star, cat, rocket) floating around,
+     matching image #6. ===== */
   body[data-theme="doodle"]{--violet:#ffd23f;--violet-soft:#ffe28a;--mint:#3fd6b0;--coral:#ff6f91;}
   body[data-theme="doodle"] #chatScreen{background:#0b0b12;}
   body[data-theme="doodle"] #chatScreen::before{content:'';position:absolute;inset:0;pointer-events:none;z-index:0;opacity:.55;
@@ -79,6 +133,8 @@
       radial-gradient(circle at 85% 20%, rgba(63,214,176,.3) 0 2px, transparent 3px),
       radial-gradient(circle at 20% 82%, rgba(255,111,145,.25) 0 2px, transparent 3px),
       radial-gradient(circle at 75% 72%, rgba(255,210,63,.25) 0 2px, transparent 3px);}
+  body[data-theme="doodle"] #chatScreen::after{content:'★ 🐱 🚀 ✦ ☆';position:absolute;top:10%;right:6%;
+    font-size:26px;letter-spacing:24px;opacity:.16;pointer-events:none;z-index:0;transform:rotate(-4deg);}
   body[data-theme="doodle"] .threadBar, body[data-theme="doodle"] #chatScreen .msgs{font-family:'Kalam',cursive;}
   body[data-theme="doodle"] .threadBar{border-bottom:1px solid rgba(255,210,63,.22);background:#0b0b12;}
   body[data-theme="doodle"] .composer{border-top:1px solid rgba(63,214,176,.22);background:#0b0b12;}
@@ -87,17 +143,79 @@
   body[data-theme="doodle"] .bubbleRow.me .bubble{color:#ffd23f!important;}
   body[data-theme="doodle"] .bubbleRow.them .bubble{color:#3fd6b0!important;}
 
+  /* ===== 8. Secret / Mystery Chat — pitch black, torn-note bubbles,
+     and a mask emoji standing in for anyone with no profile photo yet,
+     matching image #8. ===== */
   body[data-theme="mystery"]{--violet:#8a8a8a;--violet-soft:#b0b0b0;--mint:#9d9d9d;--coral:#c74b4b;}
   body[data-theme="mystery"] #chatScreen{background:#000;}
   body[data-theme="mystery"] #chatScreen::before{content:'👻';position:absolute;right:14px;top:60px;font-size:130px;
     opacity:.05;pointer-events:none;z-index:0;}
+  body[data-theme="mystery"] #chatScreen::after{content:'🔒 Some chats are meant to stay a mystery';
+    position:absolute;left:10px;bottom:80px;background:#1a1610;color:#c9a56a;font-family:'Kalam',cursive;
+    font-size:11px;padding:8px 12px;border-radius:3px;transform:rotate(-2deg);
+    box-shadow:0 6px 14px rgba(0,0,0,.5);max-width:150px;z-index:0;
+    clip-path:polygon(0% 4%,8% 0%,30% 3%,55% 0%,80% 3%,100% 0%,100% 96%,85% 100%,60% 97%,35% 100%,10% 97%,0% 100%);}
   body[data-theme="mystery"] .threadBar{background:#000;border-bottom:1px solid #222;}
   body[data-theme="mystery"] .avatar{filter:grayscale(1) brightness(.85);}
+  body[data-theme="mystery"] .avatar:not(:has(img)){color:transparent;position:relative;}
+  body[data-theme="mystery"] .avatar:not(:has(img))::after{content:'🎭';position:absolute;inset:0;
+    display:flex;align-items:center;justify-content:center;font-size:1.1em;color:initial;}
   body[data-theme="mystery"] .bubble{background:#111!important;border:1px solid #333!important;font-family:'Kalam',cursive;position:relative;z-index:1;}
   body[data-theme="mystery"] .bubbleRow.them .bubble{color:#ccc!important;}
   body[data-theme="mystery"] .bubbleRow.me .bubble{color:#eee!important;border-color:#c74b4b!important;}
 
+  /* ===== 5. Swipe Chat Cards — messages are browsed one at a time as
+     a stack of swipeable cards, with skip / reply / like controls
+     below, matching image #5. Only active when theme = swipe. ===== */
+  .swipeStackWrap{display:none;}
+  body[data-theme="swipe"] .msgs{display:none;}
+  body[data-theme="swipe"] .swipeStackWrap{flex:1;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;padding:22px;gap:18px;position:relative;z-index:1;}
+  body[data-theme="swipe"] #chatScreen{background:radial-gradient(circle at 30% 0%,#241f45,#0d0e26 70%);}
+  .swipeStack{position:relative;width:100%;max-width:290px;height:360px;}
+  .swipeCard{position:absolute;inset:0;border-radius:26px;padding:20px;display:flex;flex-direction:column;
+    justify-content:flex-end;box-shadow:0 20px 44px rgba(0,0,0,.45);overflow:hidden;transition:transform .18s ease;}
+  .swipeCard.peek{transform:scale(.93) translateY(14px);opacity:.55;filter:blur(1px);z-index:1;}
+  .swipeCard.front{z-index:2;}
+  .swipeCard.front.me{background:linear-gradient(160deg,var(--violet),#5c3dfa);}
+  .swipeCard.front.them{background:linear-gradient(160deg,#0ea5a5,#0c4a6e);}
+  .swipeCard .bubbleAvatar{display:flex!important;width:42px;height:42px;position:absolute;top:16px;left:16px;
+    border:2px solid rgba(255,255,255,.65);}
+  .swipeCard .swipeText{font-size:19px;font-weight:700;color:#fff;line-height:1.4;
+    text-shadow:0 2px 10px rgba(0,0,0,.4);}
+  .swipeCard img{width:100%;border-radius:14px;margin-bottom:8px;display:block;}
+  .swipeCard .stamp{align-self:flex-end;color:rgba(255,255,255,.75);font-size:11px;margin-top:10px;}
+  .swipeEmpty{color:var(--text-lo);font-size:13px;text-align:center;margin:auto;}
+  .swipeControls{display:flex;gap:22px;position:relative;z-index:1;}
+  .swipeBtn{width:54px;height:54px;border-radius:50%;border:none;font-size:21px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;box-shadow:0 8px 18px rgba(0,0,0,.4);}
+  .swipeBtn.back{background:#ef4444;color:#fff;}
+  .swipeBtn.reply{background:#3b82f6;color:#fff;}
+  .swipeBtn.like{background:#22c55e;color:#fff;}
+  .swipeBtn:active{transform:scale(.92);}
+  .swipeCounter{color:var(--text-lo);font-size:12px;position:relative;z-index:1;}
+
+  /* ===== 7. Story Chat (Vertical Timeline) — a connecting line runs
+     down the thread with small avatar "nodes" on it, message bubbles
+     sitting beside each node, colour-coded by sender. Matches image #7. ===== */
+  body[data-theme="story"]{--violet:#8b5cf6;--violet-soft:#a78bfa;--mint:#3fd6b0;--coral:#f2994a;}
+  body[data-theme="story"] #chatScreen{background:linear-gradient(180deg,#1a1440 0%,#2a1f55 55%,#3d2452 100%);}
+  body[data-theme="story"] .msgs{position:relative;padding-left:46px;gap:18px;}
+  body[data-theme="story"] .msgs::before{content:'';position:absolute;left:20px;top:6px;bottom:6px;width:2px;
+    background:rgba(255,255,255,.22);z-index:0;}
+  body[data-theme="story"] .bubbleRow{position:relative;justify-content:flex-start!important;}
+  body[data-theme="story"] .bubbleAvatar{display:flex!important;position:absolute;left:-46px;top:2px;
+    width:32px;height:32px;border-radius:50%;border:2.5px solid var(--bg-deep);z-index:1;font-size:12px;}
+  body[data-theme="story"] .bubbleRow.me .bubbleAvatar{border-color:var(--coral);}
+  body[data-theme="story"] .bubbleRow.them .bubbleAvatar{border-color:var(--violet-soft);}
+  body[data-theme="story"] .bubble{border-radius:16px!important;max-width:80%;}
+  body[data-theme="story"] .bubbleRow.me .bubble{background:var(--coral)!important;color:#2b1608!important;}
+  body[data-theme="story"] .bubbleRow.them .bubble{background:var(--violet)!important;color:#fff!important;border:none!important;}
+
   .bubble.hw-text{line-height:1.5;}
+  /* per-message sender avatar shown inside the bubble row — hidden
+     unless a theme (comic / story / swipe) turns it on. */
+  .bubbleRow .bubbleAvatar{display:none;width:30px;height:30px;font-size:12px;}
   *{box-sizing:border-box;}
   html,body{height:100%;margin:0;}
   body{
@@ -371,6 +489,15 @@
       </button>
     </div>
     <div class="msgs" id="msgsWrap"></div>
+    <div class="swipeStackWrap" id="swipeStackWrap">
+      <div class="swipeStack" id="swipeStack"></div>
+      <div class="swipeCounter" id="swipeCounter"></div>
+      <div class="swipeControls">
+        <button class="swipeBtn back" id="swipeBackBtn" title="Previous">✕</button>
+        <button class="swipeBtn reply" id="swipeReplyBtn" title="Reply">💬</button>
+        <button class="swipeBtn like" id="swipeLikeBtn" title="Next">❤</button>
+      </div>
+    </div>
     <div class="composer" id="composerWrap">
       <button class="roundBtn attach" id="attachBtn">
         <svg viewBox="0 0 24 24"><path d="M16.5 6.5v9a4.5 4.5 0 01-9 0v-10a3 3 0 016 0v9a1.5 1.5 0 01-3 0v-8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
@@ -534,13 +661,15 @@ function validUsername(u){ return /^[a-zA-Z0-9_]{3,20}$/.test(u); }
 
 /* ---------------- chat theme, handwriting & custom keyboard prefs ---------------- */
 const THEMES = [
-  { id:'default',     label:'Classic',    c1:'#7c5cff', c2:'#3fd6b0' },
-  { id:'sunset',       label:'Sunset Bubble', c1:'#a855f7', c2:'#f2994a' },
-  { id:'comic',        label:'Comic Strip',   c1:'#ff5da2', c2:'#ffe98a' },
-  { id:'handwritten',  label:'Handwritten',   c1:'#c2703d', c2:'#f6e7c1' },
-  { id:'character',    label:'Dreamy',        c1:'#8b5cf6', c2:'#f472b6' },
-  { id:'doodle',       label:'Neon Doodle',   c1:'#ffd23f', c2:'#3fd6b0' },
-  { id:'mystery',      label:'Secret',        c1:'#c74b4b', c2:'#8a8a8a' }
+  { id:'default',      label:'Classic',          c1:'#7c5cff', c2:'#3fd6b0' },
+  { id:'bubble',       label:'Floating Bubble',  c1:'#8b5cf6', c2:'#22c55e' },
+  { id:'comic',        label:'Comic Strip',      c1:'#ff5da2', c2:'#ffe98a' },
+  { id:'handwritten',  label:'Handwritten Note', c1:'#c2703d', c2:'#f6e7c1' },
+  { id:'character',    label:'Character Chat',   c1:'#8b5cf6', c2:'#f472b6' },
+  { id:'swipe',        label:'Swipe Cards',      c1:'#ff6f91', c2:'#22c55e' },
+  { id:'doodle',       label:'Doodle Chat',      c1:'#ffd23f', c2:'#3fd6b0' },
+  { id:'story',        label:'Story Timeline',   c1:'#f2994a', c2:'#8b5cf6' },
+  { id:'mystery',      label:'Secret Chat',      c1:'#c74b4b', c2:'#8a8a8a' }
 ];
 function getPref(key, fallback){
   const v = localStorage.getItem(key);
@@ -775,6 +904,8 @@ let me = null;           // firebase auth user
 let myProfile = null;    // {username, privacy, contacts, blocked}
 let chatListUnsub = null, reqUnsub = null, threadUnsub = null;
 let activeChatId = null, activeOtherUid = null, activeOtherName = null;
+let lastThreadMessages = [];  // cache of the open thread, used to re-render swipe-card view
+let swipeIdx = 0;             // which message the swipe-card stack is showing
 
 /* ---------------- auth: signup ---------------- */
 $('goSignup').onclick = ()=>{ $('loginCard').style.display='none'; $('signupCard').style.display='block'; };
@@ -1111,6 +1242,7 @@ $('newChatGo').onclick = async ()=>{
 function openChat(chatId, otherUid, otherName){
   activeChatId = chatId; activeOtherUid = otherUid; activeOtherName = otherName;
   hwActive = false; $('hwToggleBtn').classList.remove('on');
+  swipeIdx = 0;
   $('threadName').textContent = otherName;
   $('threadAvatar').dataset.uid = otherUid;
   $('threadAvatar').textContent = initialsAvatar(otherName);
@@ -1133,30 +1265,90 @@ function openChat(chatId, otherUid, otherName){
   threadUnsub = db.collection('chats').doc(chatId).collection('messages')
     .orderBy('time', 'asc')
     .onSnapshot(snap=>{
-      const wrap = $('msgsWrap');
-      wrap.innerHTML = '';
-      snap.forEach(docSnap=>{
-        const m = docSnap.data();
-        const row = document.createElement('div');
-        row.className = 'bubbleRow ' + (m.from === me.uid ? 'me' : 'them');
-        const inner = m.type === 'image' ? `<img src="${m.imageData}">` : escapeHtml(m.text);
-        row.innerHTML = `<div class="bubble">${inner}<span class="stamp">${fmtTime(m.time)}</span></div>`;
-        if(m.from === me.uid){
-          row.title = 'Tap to delete';
-          row.onclick = ()=> showConfirm(
-            'Delete this message?',
-            "It will be permanently removed for both of you — as if it was never sent.",
-            async ()=>{
-              await db.collection('chats').doc(chatId).collection('messages').doc(docSnap.id).delete();
-              await refreshLastMessage(chatId);
-            }
-          );
-        }
-        wrap.appendChild(row);
-      });
-      wrap.scrollTop = wrap.scrollHeight;
+      const list = [];
+      snap.forEach(docSnap=> list.push(Object.assign({ _id: docSnap.id }, docSnap.data())));
+      lastThreadMessages = list;
+      renderThread(list);
     });
 }
+
+/* avatar shown next to a bubble — used by the comic-panel and
+   story-timeline themes, hydrated with the sender's real profile photo */
+function bubbleAvatarHtml(isMe){
+  const uid = isMe ? me.uid : activeOtherUid;
+  const name = isMe ? (myProfile ? myProfile.username : '') : activeOtherName;
+  return `<div class="avatar bubbleAvatar" data-uid="${uid}">${initialsAvatar(name)}</div>`;
+}
+
+function renderThread(list){
+  const theme = getPref('oc_theme', 'default');
+  if(theme === 'swipe'){ renderSwipeStack(list); return; }
+
+  const wrap = $('msgsWrap');
+  wrap.innerHTML = '';
+  list.forEach(m=>{
+    const isMe = m.from === me.uid;
+    const row = document.createElement('div');
+    row.className = 'bubbleRow ' + (isMe ? 'me' : 'them');
+    const inner = m.type === 'image' ? `<img src="${m.imageData}">` : escapeHtml(m.text);
+    row.innerHTML = `${bubbleAvatarHtml(isMe)}<div class="bubble">${inner}<span class="stamp">${fmtTime(m.time)}</span></div>`;
+    if(isMe){
+      row.title = 'Tap to delete';
+      row.onclick = ()=> showConfirm(
+        'Delete this message?',
+        "It will be permanently removed for both of you — as if it was never sent.",
+        async ()=>{
+          await db.collection('chats').doc(activeChatId).collection('messages').doc(m._id).delete();
+          await refreshLastMessage(activeChatId);
+        }
+      );
+    }
+    wrap.appendChild(row);
+  });
+  wrap.scrollTop = wrap.scrollHeight;
+  hydrateAvatars(wrap);
+}
+
+/* ---------------- swipe-card thread view (theme: swipe) ---------------- */
+function swipeCardInner(m){
+  const isMe = m.from === me.uid;
+  const body = m.type === 'image'
+    ? `<img src="${m.imageData}">`
+    : `<div class="swipeText">${escapeHtml(m.text)}</div>`;
+  return `${bubbleAvatarHtml(isMe)}${body}<span class="stamp">${fmtTime(m.time)}</span>`;
+}
+function renderSwipeStack(list){
+  const stack = $('swipeStack');
+  stack.innerHTML = '';
+  if(list.length === 0){
+    stack.innerHTML = '<div class="swipeEmpty">No messages yet — say hi!</div>';
+    $('swipeCounter').textContent = '';
+    return;
+  }
+  if(swipeIdx > list.length - 1) swipeIdx = list.length - 1;
+  const cur = list[swipeIdx];
+  const peek = list[swipeIdx + 1];
+  if(peek){
+    const back = document.createElement('div');
+    back.className = 'swipeCard peek';
+    back.innerHTML = swipeCardInner(peek);
+    stack.appendChild(back);
+  }
+  const front = document.createElement('div');
+  front.className = 'swipeCard front ' + (cur.from === me.uid ? 'me' : 'them');
+  front.innerHTML = swipeCardInner(cur);
+  stack.appendChild(front);
+  $('swipeCounter').textContent = (swipeIdx + 1) + ' / ' + list.length;
+  hydrateAvatars(stack);
+}
+$('swipeBackBtn').onclick = ()=>{
+  if(swipeIdx > 0){ swipeIdx--; renderSwipeStack(lastThreadMessages); }
+};
+$('swipeReplyBtn').onclick = ()=>{ $('msgInput').focus(); };
+$('swipeLikeBtn').onclick = ()=>{
+  if(swipeIdx < lastThreadMessages.length - 1){ swipeIdx++; renderSwipeStack(lastThreadMessages); }
+  else toast("You're all caught up!");
+};
 
 async function refreshLastMessage(cid){
   const snap = await db.collection('chats').doc(cid).collection('messages')
