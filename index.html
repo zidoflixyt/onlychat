@@ -80,6 +80,8 @@
       radial-gradient(circle at 20% 82%, rgba(255,111,145,.25) 0 2px, transparent 3px),
       radial-gradient(circle at 75% 72%, rgba(255,210,63,.25) 0 2px, transparent 3px);}
   body[data-theme="doodle"] .threadBar, body[data-theme="doodle"] #chatScreen .msgs{font-family:'Kalam',cursive;}
+  body[data-theme="doodle"] .threadBar{border-bottom:1px solid rgba(255,210,63,.22);background:#0b0b12;}
+  body[data-theme="doodle"] .composer{border-top:1px solid rgba(63,214,176,.22);background:#0b0b12;}
   body[data-theme="doodle"] .bubble{border:2px dashed currentColor!important;border-radius:20px 4px 20px 4px!important;
     background:transparent!important;font-family:'Kalam',cursive;position:relative;z-index:1;}
   body[data-theme="doodle"] .bubbleRow.me .bubble{color:#ffd23f!important;}
@@ -256,23 +258,6 @@
   .roundBtn.mini{background:var(--bg-panel);color:var(--text-lo);border:1px solid var(--line);}
   .roundBtn.mini.on{background:var(--violet);color:#fff;border-color:var(--violet);}
 
-  /* ---------- custom on-screen keyboard ---------- */
-  #customKeyboard{display:none;border-top:1px solid var(--line);background:var(--bg-panel);
-    padding:8px 10px 10px;flex-shrink:0;max-height:38vh;overflow-y:auto;}
-  #customKeyboard.show{display:block;}
-  .kbTopRow{display:flex;gap:8px;margin-bottom:8px;}
-  .kbLangBtn{flex:1;padding:7px 0;border-radius:10px;border:1px solid var(--line);
-    background:transparent;color:var(--text-lo);font-size:12.5px;font-weight:600;cursor:pointer;}
-  .kbLangBtn.active{background:var(--violet);border-color:var(--violet);color:#fff;}
-  .kbGuide{font-size:10.5px;color:var(--text-lo);margin:8px 2px 4px;letter-spacing:.3px;}
-  .kbRow{display:flex;flex-wrap:wrap;gap:5px;}
-  .kbKey{min-width:28px;height:32px;padding:0 6px;border-radius:8px;border:1px solid var(--line);
-    background:#0f1130;color:var(--text-hi);font-size:14px;display:flex;align-items:center;
-    justify-content:center;cursor:pointer;font-family:'Quicksand',sans-serif;}
-  .kbKey.hi{font-family:'Noto Sans Devanagari',sans-serif;font-size:15px;}
-  .kbKey.wide{min-width:64px;font-size:12px;font-weight:600;color:var(--text-lo);}
-  .kbKey:active{background:var(--violet);color:#fff;}
-
   /* ---------- settings: profile picture ---------- */
   .photoRow{display:flex;align-items:center;gap:14px;}
   .photoPreview{width:64px;height:64px;border-radius:50%;flex-shrink:0;overflow:hidden;
@@ -386,16 +371,12 @@
       </button>
     </div>
     <div class="msgs" id="msgsWrap"></div>
-    <div id="customKeyboard"></div>
     <div class="composer" id="composerWrap">
       <button class="roundBtn attach" id="attachBtn">
         <svg viewBox="0 0 24 24"><path d="M16.5 6.5v9a4.5 4.5 0 01-9 0v-10a3 3 0 016 0v9a1.5 1.5 0 01-3 0v-8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
       </button>
       <button class="roundBtn mini" id="hwToggleBtn" style="display:none;" title="Send as handwriting">
         <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 000-1.41l-2.34-2.34a1 1 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="currentColor"/></svg>
-      </button>
-      <button class="roundBtn mini" id="kbToggleBtn" style="display:none;" title="Custom keyboard">
-        <svg viewBox="0 0 24 24"><path d="M4 5h16a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V6a1 1 0 011-1zm1 3v2h2V8H5zm4 0v2h2V8H9zm4 0v2h2V8h-2zm4 0v2h2V8h-2zM5 12v2h2v-2H5zm4 0v2h6v-2H9zm8 0v2h2v-2h-2z" fill="currentColor"/></svg>
       </button>
       <input type="file" id="fileInput" accept="image/*" style="display:none;">
       <textarea id="msgInput" rows="1" placeholder="Type a message…"></textarea>
@@ -451,15 +432,6 @@
           <option value="Caveat">Caveat (English)</option>
           <option value="Patrick Hand">Patrick Hand (English)</option>
         </select>
-      </div>
-
-      <div class="settingsCard">
-        <h3>Custom keyboard</h3>
-        <p>Adds an on-screen A–Z / Hindi key panel in chat, so you can type by tapping letters instead of your phone's keyboard.</p>
-        <div class="toggleRow">
-          <span class="lbl">Enable custom keyboard</span>
-          <label class="switch"><input type="checkbox" id="kbEnabledToggle"><span class="slider"></span></label>
-        </div>
       </div>
 
       <button class="logoutBtn" id="logoutBtn">Log out</button>
@@ -599,13 +571,10 @@ function renderThemeGrid(){
 let hwEnabled = getPref('oc_hw_enabled','0') === '1';
 let hwFont = getPref('oc_hw_font','Kalam');
 let hwActive = false; // per-message toggle, resets after sending
-let kbEnabled = getPref('oc_kb_enabled','0') === '1';
 
 function refreshComposerToggles(){
   $('hwToggleBtn').style.display = hwEnabled ? 'flex' : 'none';
-  $('kbToggleBtn').style.display = kbEnabled ? 'flex' : 'none';
   if(!hwEnabled){ hwActive = false; $('hwToggleBtn').classList.remove('on'); }
-  if(!kbEnabled){ $('customKeyboard').classList.remove('show'); }
 }
 
 $('hwEnabledToggle').addEventListener('change', function(){
@@ -617,118 +586,11 @@ $('hwFontSelect').addEventListener('change', function(){
   hwFont = this.value;
   localStorage.setItem('oc_hw_font', hwFont);
 });
-$('kbEnabledToggle').addEventListener('change', function(){
-  kbEnabled = this.checked;
-  localStorage.setItem('oc_kb_enabled', kbEnabled ? '1' : '0');
-  refreshComposerToggles();
-});
 
 $('hwToggleBtn').onclick = function(){
   hwActive = !hwActive;
   this.classList.toggle('on', hwActive);
   toast(hwActive ? 'This message will send as handwriting.' : 'Handwriting off for this message.');
-};
-
-/* ---------------- custom on-screen keyboard ---------------- */
-const HI_VOWELS = ['अ','आ','इ','ई','उ','ऊ','ऋ','ए','ऐ','ओ','औ','अं','अः'];
-const HI_CONSONANTS = ['क','ख','ग','घ','ङ','च','छ','ज','झ','ञ','ट','ठ','ड','ढ','ण','त','थ','द','ध','न','प','फ','ब','भ','म','य','र','ल','व','श','ष','स','ह'];
-const HI_MATRAS = ['ा','ि','ी','ु','ू','े','ै','ो','ौ','ं','ः','्'];
-let kbLang = 'en';
-let kbShift = false;
-
-function insertAtCursor(text){
-  const el = $('msgInput');
-  const start = el.selectionStart, end = el.selectionEnd;
-  el.value = el.value.slice(0,start) + text + el.value.slice(end);
-  const pos = start + text.length;
-  el.selectionStart = el.selectionEnd = pos;
-  el.focus();
-  el.dispatchEvent(new Event('input'));
-}
-function kbKey(label, cls, onTap){
-  const b = document.createElement('button');
-  b.type = 'button';
-  b.className = 'kbKey ' + (cls||'');
-  b.textContent = label;
-  b.onclick = onTap;
-  return b;
-}
-function buildKeyboard(){
-  const box = $('customKeyboard');
-  box.innerHTML = '';
-
-  const topRow = document.createElement('div'); topRow.className = 'kbTopRow';
-  const enBtn = document.createElement('button'); enBtn.className = 'kbLangBtn' + (kbLang==='en'?' active':''); enBtn.textContent = 'English';
-  const hiBtn = document.createElement('button'); hiBtn.className = 'kbLangBtn' + (kbLang==='hi'?' active':''); hiBtn.textContent = 'हिन्दी';
-  enBtn.onclick = ()=>{ kbLang='en'; buildKeyboard(); };
-  hiBtn.onclick = ()=>{ kbLang='hi'; buildKeyboard(); };
-  topRow.appendChild(enBtn); topRow.appendChild(hiBtn);
-  box.appendChild(topRow);
-
-  if(kbLang === 'en'){
-    const guide1 = document.createElement('div'); guide1.className='kbGuide';
-    guide1.textContent = kbShift ? 'Type: A B C D … (capital)' : 'Type: a b c d … (small)';
-    box.appendChild(guide1);
-    const row1 = document.createElement('div'); row1.className = 'kbRow';
-    for(let i=0;i<26;i++){
-      const ch = String.fromCharCode(97+i);
-      const shown = kbShift ? ch.toUpperCase() : ch;
-      row1.appendChild(kbKey(shown, '', ()=> insertAtCursor(shown)));
-    }
-    box.appendChild(row1);
-
-    const guide2 = document.createElement('div'); guide2.className='kbGuide'; guide2.textContent = 'Numbers & punctuation';
-    box.appendChild(guide2);
-    const row2 = document.createElement('div'); row2.className = 'kbRow';
-    '0123456789'.split('').forEach(ch=> row2.appendChild(kbKey(ch,'',()=>insertAtCursor(ch))));
-    ['.',',','!','?',"'",'"','-','@'].forEach(ch=> row2.appendChild(kbKey(ch,'',()=>insertAtCursor(ch))));
-    box.appendChild(row2);
-
-    const row3 = document.createElement('div'); row3.className = 'kbRow'; row3.style.marginTop='6px';
-    row3.appendChild(kbKey(kbShift ? 'abc' : 'ABC', 'wide', ()=>{ kbShift=!kbShift; buildKeyboard(); }));
-    row3.appendChild(kbKey('Space', 'wide', ()=> insertAtCursor(' ')));
-    row3.appendChild(kbKey('⌫', 'wide', ()=>{
-      const el=$('msgInput'); const start=el.selectionStart, end=el.selectionEnd;
-      if(start===end && start>0){ el.value = el.value.slice(0,start-1)+el.value.slice(end); el.selectionStart=el.selectionEnd=start-1; }
-      else { el.value = el.value.slice(0,start)+el.value.slice(end); el.selectionStart=el.selectionEnd=start; }
-      el.focus(); el.dispatchEvent(new Event('input'));
-    }));
-    box.appendChild(row3);
-  } else {
-    const g1 = document.createElement('div'); g1.className='kbGuide'; g1.textContent='हिन्दी स्वर (vowels)';
-    box.appendChild(g1);
-    const r1 = document.createElement('div'); r1.className='kbRow';
-    HI_VOWELS.forEach(ch=> r1.appendChild(kbKey(ch,'hi',()=>insertAtCursor(ch))));
-    box.appendChild(r1);
-
-    const g2 = document.createElement('div'); g2.className='kbGuide'; g2.textContent='हिन्दी व्यंजन (consonants)';
-    box.appendChild(g2);
-    const r2 = document.createElement('div'); r2.className='kbRow';
-    HI_CONSONANTS.forEach(ch=> r2.appendChild(kbKey(ch,'hi',()=>insertAtCursor(ch))));
-    box.appendChild(r2);
-
-    const g3 = document.createElement('div'); g3.className='kbGuide'; g3.textContent='मात्राएँ (append after a consonant)';
-    box.appendChild(g3);
-    const r3 = document.createElement('div'); r3.className='kbRow';
-    HI_MATRAS.forEach(ch=> r3.appendChild(kbKey(ch,'hi',()=>insertAtCursor(ch))));
-    box.appendChild(r3);
-
-    const row4 = document.createElement('div'); row4.className = 'kbRow'; row4.style.marginTop='6px';
-    row4.appendChild(kbKey('Space', 'wide', ()=> insertAtCursor(' ')));
-    row4.appendChild(kbKey('⌫', 'wide', ()=>{
-      const el=$('msgInput'); const start=el.selectionStart, end=el.selectionEnd;
-      if(start===end && start>0){ el.value = el.value.slice(0,start-1)+el.value.slice(end); el.selectionStart=el.selectionEnd=start-1; }
-      else { el.value = el.value.slice(0,start)+el.value.slice(end); el.selectionStart=el.selectionEnd=start; }
-      el.focus(); el.dispatchEvent(new Event('input'));
-    }));
-    box.appendChild(row4);
-  }
-}
-$('kbToggleBtn').onclick = function(){
-  const box = $('customKeyboard');
-  const showing = box.classList.toggle('show');
-  this.classList.toggle('on', showing);
-  if(showing) buildKeyboard();
 };
 
 /* ---------------- handwriting studio: draw & save your own letters ---------------- */
@@ -806,8 +668,35 @@ $('openHwStudioBtn').onclick = ()=>{
 };
 $('backFromStudio').onclick = ()=>{ showScreen('settingsScreen'); updateHwCountLabel(); };
 $('hwClearBtn').onclick = ()=> clearHwCanvas();
+function cropCanvasToInk(canvas){
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  const data = ctx.getImageData(0, 0, w, h).data;
+  let minX=w, minY=h, maxX=0, maxY=0, found=false;
+  for(let y=0; y<h; y++){
+    for(let x=0; x<w; x++){
+      const i = (y*w+x)*4;
+      if(data[i+3] > 10 && (data[i] < 245 || data[i+1] < 245 || data[i+2] < 245)){
+        found = true;
+        if(x<minX) minX=x; if(x>maxX) maxX=x;
+        if(y<minY) minY=y; if(y>maxY) maxY=y;
+      }
+    }
+  }
+  if(!found) return null;
+  const pad = 12;
+  minX = Math.max(0, minX-pad); minY = Math.max(0, minY-pad);
+  maxX = Math.min(w-1, maxX+pad); maxY = Math.min(h-1, maxY+pad);
+  const cw = maxX-minX+1, ch = maxY-minY+1;
+  const out = document.createElement('canvas');
+  out.width = cw; out.height = ch;
+  out.getContext('2d').drawImage(canvas, minX, minY, cw, ch, 0, 0, cw, ch);
+  return out;
+}
 $('hwSaveBtn').onclick = ()=>{
-  hwGlyphs[hwCurLetter] = $('hwCanvas').toDataURL('image/png');
+  const cropped = cropCanvasToInk($('hwCanvas'));
+  if(!cropped){ toast('Draw the letter first, then save.'); return; }
+  hwGlyphs[hwCurLetter] = cropped.toDataURL('image/png');
   saveHwGlyphsToStorage();
   toast('Saved "' + hwCurLetter + '".');
   renderHwLetterGrid();
@@ -818,7 +707,7 @@ $('hwSaveBtn').onclick = ()=>{
    any character that hasn't been drawn yet falls back to a cursive font. */
 function composeHandwritingImage(text){
   loadHwGlyphs();
-  const cellW = 30, cellH = 42, lineH = 48, padding = 18, maxWidth = 520;
+  const cellW = 32, cellH = 42, lineH = 48, padding = 16, maxWidth = 480;
   const lines = [[]];
   let x = padding;
   for(const ch of text){
@@ -828,8 +717,15 @@ function composeHandwritingImage(text){
     lines[lines.length-1].push(ch);
     x += w;
   }
+  let contentWidth = 0;
+  lines.forEach(lineChars=>{
+    let w = 0;
+    lineChars.forEach(ch=> w += (ch === ' ' ? 16 : cellW));
+    if(w > contentWidth) contentWidth = w;
+  });
+  const canvasW = Math.min(maxWidth, Math.max(70, contentWidth + padding*2));
   const canvas = document.createElement('canvas');
-  canvas.width = maxWidth;
+  canvas.width = canvasW;
   canvas.height = padding*2 + lines.length*lineH;
   const ctx = canvas.getContext('2d');
   ctx.fillStyle = '#fdf9ef'; ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -848,7 +744,12 @@ function composeHandwritingImage(text){
         if(hwGlyphs[ch]){
           pending++;
           const img = new Image();
-          img.onload = ()=>{ ctx.drawImage(img, cx, cy-cellH/2, cellW, cellH); pending--; finishIfReady(); };
+          img.onload = ()=>{
+            const scale = Math.min(cellW / img.naturalWidth, cellH / img.naturalHeight);
+            const dw = img.naturalWidth * scale, dh = img.naturalHeight * scale;
+            ctx.drawImage(img, cx + (cellW-dw)/2, cy - dh/2, dw, dh);
+            pending--; finishIfReady();
+          };
           img.onerror = ()=>{ pending--; finishIfReady(); };
           img.src = hwGlyphs[ch];
         }else if(ch !== ' '){
@@ -866,7 +767,6 @@ function composeHandwritingImage(text){
 applyTheme(getPref('oc_theme','default'));
 $('hwFontSelect').value = hwFont;
 $('hwEnabledToggle').checked = hwEnabled;
-$('kbEnabledToggle').checked = kbEnabled;
 renderThemeGrid();
 refreshComposerToggles();
 
@@ -1038,8 +938,6 @@ $('openSettings').onclick = ()=> showScreen('settingsScreen');
 $('backFromSettings').onclick = ()=> showScreen('chatListScreen');
 $('backFromChat').onclick = ()=>{
   if(threadUnsub) threadUnsub();
-  $('customKeyboard').classList.remove('show');
-  $('kbToggleBtn').classList.remove('on');
   showScreen('chatListScreen');
 };
 
@@ -1212,7 +1110,6 @@ $('newChatGo').onclick = async ()=>{
 function openChat(chatId, otherUid, otherName){
   activeChatId = chatId; activeOtherUid = otherUid; activeOtherName = otherName;
   hwActive = false; $('hwToggleBtn').classList.remove('on');
-  $('customKeyboard').classList.remove('show'); $('kbToggleBtn').classList.remove('on');
   $('threadName').textContent = otherName;
   $('threadAvatar').dataset.uid = otherUid;
   $('threadAvatar').textContent = initialsAvatar(otherName);
