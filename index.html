@@ -545,20 +545,44 @@ function goAuth(mode){ showScreen('phone'); }
 window.goAuth = goAuth;
 
 /* ---------------- Recaptcha / Phone Auth ---------------- */
-function ensureRecaptcha(){
-  if(window.recaptchaVerifier) return window.recaptchaVerifier;
+// Singleton lifecycle: never instantiate a second RecaptchaVerifier on top of
+// an existing one. Always tear down the previous widget AND wipe the DOM node
+// before creating a fresh instance, otherwise Firebase throws
+// "reCAPTCHA has already been rendered in this element".
+function destroyRecaptcha(){
+  try{
+    if(window.recaptchaVerifier){
+      window.recaptchaVerifier.clear();
+    }
+  }catch(e){
+    console.warn('recaptcha clear() warning:', e);
+  }
+  window.recaptchaVerifier = null;
+  const container = document.getElementById('recaptcha-container');
+  if(container) container.innerHTML = '';
+}
+function resetRecaptcha(){ destroyRecaptcha(); }
+
+function createRecaptcha(){
+  destroyRecaptcha(); // guarantee a clean container before every (re)render
   window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-    size: 'invisible',
-    callback: () => {}
+    'size': 'invisible',
+    'callback': (response) => {
+      // reCAPTCHA solved silently (invisible mode) — signInWithPhoneNumber proceeds.
+    },
+    'expired-callback': () => {
+      // Token expired before it was used — tear down so the next attempt gets a fresh widget.
+      toast('Verification expired, please try again');
+      destroyRecaptcha();
+    }
   });
   return window.recaptchaVerifier;
 }
-function resetRecaptcha(){
-  try{
-    if(window.recaptchaVerifier){ window.recaptchaVerifier.clear(); }
-  }catch(e){}
-  window.recaptchaVerifier = null;
-  $('recaptcha-container').innerHTML = '';
+function ensureRecaptcha(){
+  // Reuse the current widget only if one is already mounted; otherwise create it.
+  // sendOtp() always calls destroyRecaptcha() first on any failure path, so a
+  // stale/corrupted widget can never linger here.
+  return window.recaptchaVerifier || createRecaptcha();
 }
 
 async function sendOtp(isResend){
@@ -574,11 +598,15 @@ async function sendOtp(isResend){
     target = '+'+cc+num;
   }
   pendingE164 = target;
-  if(!isResend){ label.innerHTML = '<span class="spinner inline-block align-middle"></span>'; btn.disabled = true; }
+  label.innerHTML = '<span class="spinner inline-block align-middle"></span>';
+  btn.disabled = true;
   try{
-    const verifier = ensureRecaptcha();
+    // Always render a brand-new widget for this send attempt. Reusing a widget
+    // across separate signInWithPhoneNumber calls is what corrupts the container.
+    const verifier = createRecaptcha();
     confirmationResult = await signInWithPhoneNumber(auth, target, verifier);
-    if(!isResend){ label.textContent = 'Send Code'; btn.disabled = false; }
+    label.textContent = 'Send Code';
+    btn.disabled = false;
     $('otpSubtext').textContent = `Enter the 6-digit code sent to ${target}.`;
     clearOtpBoxes();
     showScreen('otp');
@@ -586,9 +614,20 @@ async function sendOtp(isResend){
     toast(isResend ? 'Code resent' : 'Code sent');
   }catch(err){
     console.error(err);
-    if(!isResend){ label.textContent = 'Send Code'; btn.disabled = false; }
+    label.textContent = 'Send Code';
+    btn.disabled = false;
     toast('Could not send code: ' + (err.code || err.message));
-    resetRecaptcha();
+    // Always tear the widget down on failure so the very next click gets a
+    // clean container instead of "reCAPTCHA has already been rendered".
+    destroyRecaptcha();
+    if(isResend){
+      // Let the user retry immediately rather than waiting out a cooldown
+      // that was measuring a send which never actually completed.
+      clearInterval(resendTimer);
+      resendSecondsLeft = 0;
+      $('resendBtn').textContent = 'Resend code';
+      $('resendBtn').disabled = false;
+    }
   }
 }
 window.sendOtp = sendOtp;
