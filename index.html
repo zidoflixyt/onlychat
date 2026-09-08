@@ -45,15 +45,23 @@
   @keyframes spin{to{transform:rotate(360deg);}}
   .otp-box{width:44px; height:52px; text-align:center; font-size:20px; background:#1E293B; border:1px solid #253046; border-radius:10px; color:white;}
   .status-ring{background:conic-gradient(#3B82F6,#2563EB);}
+  .sheet-backdrop{position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:998; display:none; align-items:flex-end; justify-content:center;}
+  .sheet-backdrop.active{display:flex;}
+  .sheet{width:100%; max-width:480px; background:#0F172A; border-top-left-radius:24px; border-top-right-radius:24px; padding:20px; border:1px solid rgba(255,255,255,.08); border-bottom:none; animation:slideUp .25s ease both;}
+  @keyframes slideUp{from{transform:translateY(100%);} to{transform:translateY(0);}}
+  .settings-row{ display:block; width:100%; text-align:left; padding:14px 12px; color:white; font-size:14px; font-weight:500; border-bottom:1px solid rgba(255,255,255,.05); }
+  .plan-card{border:2px solid rgba(255,255,255,.1); border-radius:16px; padding:14px; cursor:pointer; transition:.15s;}
+  .plan-card.selected{border-color:#3B82F6; background:rgba(59,130,246,.1);}
+  .story-progress-track{height:2.5px; background:rgba(255,255,255,.25); border-radius:2px; flex:1; overflow:hidden;}
+  .story-progress-fill{height:100%; background:white; width:0%;}
 </style>
 </head>
 <body>
 <div id="app">
 
-  <!-- ============ TOASTS ============ -->
   <div id="toastHost"></div>
 
-  <!-- ============ 1. SPLASH SCREEN ============ -->
+  <!-- 1. SPLASH -->
   <section id="screen-splash" class="screen active items-center justify-between px-8 py-14 text-center">
     <div></div>
     <div class="flex flex-col items-center">
@@ -70,7 +78,7 @@
     </div>
   </section>
 
-  <!-- ============ AUTH: PHONE ENTRY ============ -->
+  <!-- PHONE ENTRY -->
   <section id="screen-phone" class="screen px-6 py-8">
     <button onclick="showScreen('splash')" class="text-muted mb-6">&larr;</button>
     <h2 class="text-2xl font-bold text-white mb-1">Enter your number</h2>
@@ -87,29 +95,33 @@
     <div id="recaptcha-container" class="mt-4"></div>
   </section>
 
-  <!-- ============ AUTH: OTP VERIFY ============ -->
+  <!-- OTP -->
   <section id="screen-otp" class="screen px-6 py-8">
     <button onclick="showScreen('phone')" class="text-muted mb-6">&larr;</button>
     <h2 class="text-2xl font-bold text-white mb-1">Verify code</h2>
     <p id="otpSubtext" class="text-muted text-sm mb-6">Enter the 6-digit code we sent you.</p>
     <div class="flex gap-2 justify-center mb-6" id="otpBoxes">
-      <input maxlength="1" class="otp-box" oninput="otpMove(this,0)">
-      <input maxlength="1" class="otp-box" oninput="otpMove(this,1)">
-      <input maxlength="1" class="otp-box" oninput="otpMove(this,2)">
-      <input maxlength="1" class="otp-box" oninput="otpMove(this,3)">
-      <input maxlength="1" class="otp-box" oninput="otpMove(this,4)">
-      <input maxlength="1" class="otp-box" oninput="otpMove(this,5)">
+      <input maxlength="1" class="otp-box" data-idx="0">
+      <input maxlength="1" class="otp-box" data-idx="1">
+      <input maxlength="1" class="otp-box" data-idx="2">
+      <input maxlength="1" class="otp-box" data-idx="3">
+      <input maxlength="1" class="otp-box" data-idx="4">
+      <input maxlength="1" class="otp-box" data-idx="5">
     </div>
-    <button onclick="verifyOtp()" class="w-full py-3.5 rounded-2xl bg-accent text-white font-semibold active:scale-[0.98] transition">Verify &amp; Continue</button>
-    <button onclick="sendOtp(true)" class="w-full py-3 mt-2 text-accent2 text-sm font-medium">Resend code</button>
+    <button id="verifyOtpBtn" onclick="verifyOtp()" class="w-full py-3.5 rounded-2xl bg-accent text-white font-semibold active:scale-[0.98] transition">Verify &amp; Continue</button>
+    <button id="resendBtn" onclick="sendOtp(true)" class="w-full py-3 mt-2 text-accent2 text-sm font-medium disabled:opacity-40" disabled>Resend code in 60s</button>
   </section>
 
-  <!-- ============ AUTH: USERNAME SETUP ============ -->
+  <!-- USERNAME SETUP -->
   <section id="screen-setup" class="screen px-6 py-8">
     <h2 class="text-2xl font-bold text-white mb-1">Create your profile</h2>
     <p class="text-muted text-sm mb-6">Pick a unique username — this is how people find you.</p>
     <div class="flex flex-col items-center mb-6">
-      <div class="w-24 h-24 rounded-full bg-gradient-to-br from-accent to-accent2 avatar-fallback text-3xl" id="setupAvatarPreview">?</div>
+      <div class="relative">
+        <div id="setupAvatarPreview" class="w-24 h-24 rounded-full bg-gradient-to-br from-accent to-accent2 avatar-fallback text-3xl overflow-hidden">?</div>
+        <button onclick="document.getElementById('setupAvatarFile').click()" class="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-accent border-2 border-bg flex items-center justify-center text-white text-sm">📷</button>
+        <input type="file" id="setupAvatarFile" accept="image/*" class="hidden" onchange="handleAvatarFile(this, 'setup')">
+      </div>
     </div>
     <label class="text-xs text-muted mb-1 block">Display name</label>
     <input id="setupDisplayName" oninput="updateAvatarPreview()" placeholder="e.g. Rahul Verma" class="w-full bg-bubble border border-white/10 rounded-xl px-4 py-3 text-white outline-none placeholder:text-muted mb-4">
@@ -123,7 +135,7 @@
     <button id="finishSetupBtn" onclick="finishSetup()" class="w-full py-3.5 rounded-2xl bg-accent text-white font-semibold active:scale-[0.98] transition disabled:opacity-40" disabled>Start Chatting</button>
   </section>
 
-  <!-- ============ 2. HOME / CHAT LIST ============ -->
+  <!-- HOME -->
   <section id="screen-home" class="screen">
     <header class="glass sticky top-0 z-20 px-4 pt-4 pb-2 border-b border-white/5">
       <div class="flex items-center justify-between mb-3">
@@ -151,7 +163,8 @@
 
     <div id="tab-status" class="hidden flex-1 overflow-y-auto no-scrollbar pb-24"></div>
     <div id="tab-calls" class="hidden flex-1 overflow-y-auto no-scrollbar pb-24">
-      <div class="flex flex-col items-center justify-center text-center px-10 pt-20">
+      <div id="callsList" class="divide-y divide-white/5"></div>
+      <div id="callsEmpty" class="flex flex-col items-center justify-center text-center px-10 pt-20">
         <p class="text-white font-semibold mb-1">No call history</p>
         <p class="text-muted text-sm">Calls you make or receive will show up here.</p>
       </div>
@@ -162,15 +175,15 @@
     </button>
 
     <nav class="glass absolute bottom-0 left-0 right-0 flex items-center justify-around py-3 border-t border-white/5">
-      <button onclick="showScreen('home');setHomeTab('chats')" class="flex flex-col items-center gap-1 text-accent2">
+      <button onclick="showScreen('home');setHomeTab('chats')" data-navtab="chats" class="flex flex-col items-center gap-1 text-accent2">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
         <span class="text-[10px] font-medium">Chats</span>
       </button>
-      <button onclick="showScreen('home');setHomeTab('status')" class="flex flex-col items-center gap-1 text-muted">
+      <button onclick="showScreen('home');setHomeTab('status')" data-navtab="status" class="flex flex-col items-center gap-1 text-muted">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
         <span class="text-[10px] font-medium">Status</span>
       </button>
-      <button onclick="showScreen('home');setHomeTab('calls')" class="flex flex-col items-center gap-1 text-muted">
+      <button onclick="showScreen('home');setHomeTab('calls')" data-navtab="calls" class="flex flex-col items-center gap-1 text-muted">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.4 2.1L8.1 9.6a16 16 0 0 0 6.3 6.3l1.1-1.2a2 2 0 0 1 2.1-.4c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.7 2z"/></svg>
         <span class="text-[10px] font-medium">Calls</span>
       </button>
@@ -181,7 +194,7 @@
     </nav>
   </section>
 
-  <!-- ============ 6. SEARCH SCREEN ============ -->
+  <!-- SEARCH -->
   <section id="screen-search" class="screen px-4 pt-4">
     <div class="flex items-center gap-3 mb-4">
       <button onclick="showScreen('home')" class="text-muted">&larr;</button>
@@ -193,7 +206,7 @@
     <div id="searchResults" class="flex-1 overflow-y-auto no-scrollbar pb-6"></div>
   </section>
 
-  <!-- ============ 7. NEW CHAT SCREEN ============ -->
+  <!-- NEW CHAT -->
   <section id="screen-newchat" class="screen px-4 pt-4">
     <div class="flex items-center gap-3 mb-4">
       <button onclick="showScreen('home')" class="text-muted">&larr;</button>
@@ -209,7 +222,7 @@
     </div>
   </section>
 
-  <!-- ============ 3. CHAT SCREEN ============ -->
+  <!-- CHAT -->
   <section id="screen-chat" class="screen">
     <header class="glass sticky top-0 z-20 px-3 py-3 border-b border-white/5 flex items-center gap-2">
       <button onclick="leaveChat()" class="text-muted p-1">&larr;</button>
@@ -221,16 +234,16 @@
         </div>
         <p id="chatHeaderStatus" class="text-[12px] text-muted"></p>
       </div>
-      <button onclick="toast('Calling…')" class="text-white/80 p-1.5"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.4 2.1L8.1 9.6a16 16 0 0 0 6.3 6.3l1.1-1.2a2 2 0 0 1 2.1-.4c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.7 2z"/></svg></button>
-      <button onclick="toast('Starting video call…')" class="text-white/80 p-1.5"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></button>
+      <button onclick="logCall('audio')" class="text-white/80 p-1.5"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.4 2.1L8.1 9.6a16 16 0 0 0 6.3 6.3l1.1-1.2a2 2 0 0 1 2.1-.4c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.7 2z"/></svg></button>
+      <button onclick="logCall('video')" class="text-white/80 p-1.5"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></button>
     </header>
     <div id="messagesList" class="flex-1 overflow-y-auto no-scrollbar px-3 py-4 space-y-2"></div>
-    <div id="typingIndicator" class="hidden px-4 pb-1 text-xs text-muted"></div>
     <div class="glass px-3 py-3 border-t border-white/5 flex items-end gap-2">
-      <button onclick="toast('Attach a file')" class="text-white/70 p-2"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.4 11.5l-9.2 9.2a5.5 5.5 0 0 1-7.8-7.8l9.2-9.2a3.6 3.6 0 0 1 5.1 5.1l-9.2 9.2a1.7 1.7 0 0 1-2.5-2.5l8.5-8.5"/></svg></button>
+      <button onclick="document.getElementById('chatImageInput').click()" class="text-white/70 p-2"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.4 11.5l-9.2 9.2a5.5 5.5 0 0 1-7.8-7.8l9.2-9.2a3.6 3.6 0 0 1 5.1 5.1l-9.2 9.2a1.7 1.7 0 0 1-2.5-2.5l8.5-8.5"/></svg></button>
+      <input type="file" id="chatImageInput" accept="image/*" class="hidden" onchange="sendImageMessage(this)">
       <div class="flex-1 bg-bubble rounded-2xl px-4 py-2.5 flex items-center border border-white/10">
         <input id="messageInput" onkeydown="if(event.key==='Enter'){event.preventDefault();sendMessage();}" placeholder="Type a message…" class="flex-1 bg-transparent text-white outline-none placeholder:text-muted text-[15px]">
-        <button onclick="toast('Camera')" class="text-white/60 ml-2"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></button>
+        <button onclick="document.getElementById('chatImageInput').click()" class="text-white/60 ml-2"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></button>
       </div>
       <button onclick="sendMessage()" class="w-11 h-11 rounded-full bg-accent flex items-center justify-center shrink-0 active:scale-90 transition">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
@@ -238,14 +251,18 @@
     </div>
   </section>
 
-  <!-- ============ 4. PROFILE SCREEN ============ -->
+  <!-- PROFILE -->
   <section id="screen-profile" class="screen px-5 pt-4">
     <div class="flex items-center gap-3 mb-6">
       <button onclick="goBackFromProfile()" class="text-muted">&larr;</button>
       <h2 class="text-lg font-bold text-white">Profile</h2>
     </div>
     <div class="flex flex-col items-center mb-5">
-      <div id="profileAvatar" class="w-28 h-28 rounded-full avatar-fallback text-4xl mb-3"></div>
+      <div class="relative">
+        <div id="profileAvatar" class="w-28 h-28 rounded-full avatar-fallback text-4xl mb-3 overflow-hidden"></div>
+        <button id="profileAvatarEditBtn" onclick="document.getElementById('profileAvatarFile').click()" class="hidden absolute bottom-3 right-0 w-9 h-9 rounded-full bg-accent border-2 border-bg items-center justify-center text-white text-sm">📷</button>
+        <input type="file" id="profileAvatarFile" accept="image/*" class="hidden" onchange="handleAvatarFile(this, 'profile')">
+      </div>
       <div class="flex items-center gap-1.5">
         <h3 id="profileName" class="text-xl font-bold text-white"></h3>
         <span id="profileTick"></span>
@@ -264,7 +281,7 @@
     <div class="divide-y divide-white/5 border-y border-white/5 mb-8">
       <div class="flex items-center justify-between py-3.5">
         <span class="text-white text-sm">Media, Links &amp; Docs</span>
-        <span class="text-muted text-sm">0 &nbsp;›</span>
+        <span id="mediaCount" class="text-muted text-sm">0 &nbsp;›</span>
       </div>
       <div class="flex items-center justify-between py-3.5">
         <span class="text-white text-sm">Starred Messages</span>
@@ -277,14 +294,18 @@
     </div>
   </section>
 
-  <!-- ============ 5. SETTINGS SCREEN ============ -->
+  <!-- SETTINGS -->
   <section id="screen-settings" class="screen px-4 pt-4 pb-10">
     <div class="flex items-center gap-3 mb-6">
       <button onclick="showScreen('home')" class="text-muted">&larr;</button>
       <h2 class="text-lg font-bold text-white">Settings</h2>
     </div>
     <div class="flex items-center gap-4 bg-bubble/60 rounded-2xl p-4 mb-6 border border-white/5">
-      <div id="settingsAvatar" class="w-14 h-14 rounded-full avatar-fallback text-lg shrink-0"></div>
+      <div class="relative">
+        <div id="settingsAvatar" class="w-14 h-14 rounded-full avatar-fallback text-lg shrink-0 overflow-hidden"></div>
+        <button onclick="document.getElementById('settingsAvatarFile').click()" class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-accent border-2 border-bg2 flex items-center justify-center text-[10px]">📷</button>
+        <input type="file" id="settingsAvatarFile" accept="image/*" class="hidden" onchange="handleAvatarFile(this, 'profile')">
+      </div>
       <div class="min-w-0">
         <div class="flex items-center gap-1">
           <p id="settingsName" class="text-white font-semibold truncate"></p>
@@ -307,33 +328,63 @@
           <p class="text-white font-bold flex items-center gap-1.5">Get Verified <span>✓</span></p>
           <p class="text-blue-100 text-xs mt-0.5">Blue tick badge — monthly or annual</p>
         </div>
-        <button id="verifyToggleBtn" onclick="toggleVerified()" class="bg-white/20 text-white text-xs font-semibold px-3 py-2 rounded-xl active:scale-95 transition">Enable</button>
+        <button id="verifyToggleBtn" onclick="openVerifySheet()" class="bg-white/20 text-white text-xs font-semibold px-3 py-2 rounded-xl active:scale-95 transition">Enable</button>
       </div>
     </div>
     <button onclick="doLogout()" class="settings-row text-red-400 mt-4">Log Out</button>
   </section>
 
-  <!-- ============ 8. STATUS UPLOAD / VIEW helpers rendered dynamically ============ -->
-
-  <!-- ============ 9. MEDIA VIEWER ============ -->
+  <!-- MEDIA VIEWER -->
   <section id="screen-media" class="screen bg-black items-center justify-center">
-    <div class="absolute top-4 left-4 right-4 flex items-center justify-between z-10">
-      <button onclick="closeMedia()" class="text-white bg-black/40 rounded-full w-9 h-9 flex items-center justify-center">✕</button>
-      <div class="flex gap-3">
-        <button onclick="toast('Added to favorites')" class="text-white bg-black/40 rounded-full w-9 h-9 flex items-center justify-center">♥</button>
-        <button onclick="toast('Share sheet opened')" class="text-white bg-black/40 rounded-full w-9 h-9 flex items-center justify-center">⤴</button>
+    <div id="storyProgressWrap" class="hidden absolute top-3 left-3 right-3 flex gap-1.5 z-10"></div>
+    <div id="storyHeader" class="hidden absolute top-8 left-4 right-4 flex items-center gap-2.5 z-10">
+      <div id="storyAvatar" class="w-9 h-9 rounded-full overflow-hidden shrink-0"></div>
+      <div class="min-w-0">
+        <div class="flex items-center gap-1"><span id="storyName" class="text-white text-sm font-semibold truncate"></span><span id="storyTick"></span></div>
+        <p id="storyTime" class="text-white/70 text-[11px]"></p>
       </div>
+    </div>
+    <div class="absolute top-4 right-4 flex items-center gap-3 z-10">
+      <button onclick="toast('Added to favorites')" class="text-white bg-black/40 rounded-full w-9 h-9 flex items-center justify-center">♥</button>
+      <button onclick="toast('Share sheet opened')" class="text-white bg-black/40 rounded-full w-9 h-9 flex items-center justify-center">⤴</button>
+      <button onclick="closeMedia()" class="text-white bg-black/40 rounded-full w-9 h-9 flex items-center justify-center">✕</button>
     </div>
     <img id="mediaViewerImg" class="max-w-full max-h-full object-contain" src="">
   </section>
 
 </div>
 
+<!-- VERIFY SHEET -->
+<div id="verifySheetBackdrop" class="sheet-backdrop" onclick="if(event.target===this)closeVerifySheet()">
+  <div class="sheet">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-white font-bold text-lg">Get the Blue Tick</h3>
+      <button onclick="closeVerifySheet()" class="text-muted">✕</button>
+    </div>
+    <p class="text-muted text-sm mb-4">Choose a plan to unlock the verified badge across OnlyChat.</p>
+    <div class="space-y-3 mb-5">
+      <div class="plan-card selected" data-plan="monthly" onclick="selectPlan(this,'monthly')">
+        <div class="flex items-center justify-between">
+          <div><p class="text-white font-semibold">Monthly</p><p class="text-muted text-xs">Billed every month</p></div>
+          <p class="text-white font-bold">₹99<span class="text-muted text-xs font-normal">/mo</span></p>
+        </div>
+      </div>
+      <div class="plan-card" data-plan="yearly" onclick="selectPlan(this,'yearly')">
+        <div class="flex items-center justify-between">
+          <div><p class="text-white font-semibold">Annual</p><p class="text-muted text-xs">Save ~16% vs monthly</p></div>
+          <p class="text-white font-bold">₹999<span class="text-muted text-xs font-normal">/yr</span></p>
+        </div>
+      </div>
+    </div>
+    <button id="simulatePayBtn" onclick="activateVerification()" class="w-full py-3.5 rounded-2xl bg-accent text-white font-semibold active:scale-[0.98] transition">Simulate Payment &amp; Activate</button>
+    <button id="removeVerifyBtn" onclick="deactivateVerification()" class="hidden w-full py-3 mt-2 text-red-400 text-sm font-medium">Cancel subscription</button>
+  </div>
+</div>
+
 <style>
   .settings-row{ display:block; width:100%; text-align:left; padding:14px 12px; color:white; font-size:14px; font-weight:500; border-bottom:1px solid rgba(255,255,255,.05); }
 </style>
 
-<!-- ============ FIREBASE (Modular SDK v10) ============ -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
@@ -341,7 +392,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   getFirestore, doc, getDoc, getDocs, setDoc, updateDoc, addDoc, collection, query, where,
-  orderBy, limit, onSnapshot, serverTimestamp, Timestamp, startAt, endAt, arrayUnion, increment
+  orderBy, limit, onSnapshot, serverTimestamp, Timestamp, arrayUnion, arrayRemove, increment
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import {
   getStorage, ref, uploadBytes, getDownloadURL
@@ -363,24 +414,32 @@ const db = getFirestore(fbApp);
 const storage = getStorage(fbApp);
 
 /* ---------------- Global state ---------------- */
-let currentUser = null;          // Firebase auth user
-let myProfile = null;            // Firestore users/{uid} doc
+let currentUser = null;
+let myProfile = null;
 let confirmationResult = null;
 let pendingE164 = null;
-let userCache = {};              // uid -> user doc data
-let allUsersCache = [];          // for search/new-chat listing
-let activeChat = null;           // { chatId, otherUid }
+let userCache = {};
+let allUsersCache = [];
+let activeChat = null;
 let unsubChatList = null;
 let unsubMessages = null;
 let unsubStatus = null;
 let unsubMyDoc = null;
+let unsubCalls = null;
 let selectedNewChatUid = null;
 let homeTab = 'chats';
 let usernameAvailable = false;
+let resendTimer = null;
+let resendSecondsLeft = 0;
+let storyGroups = [];       // [{user, stories:[...]}]
+let storyGroupIdx = 0;
+let storyIdx = 0;
+let storyTimer = null;
+let storyRafStart = 0;
+let selectedPlan = 'monthly';
 
-window.currentUser = null; // exposed for inline handlers before auth resolves
+window.currentUser = null;
 
-/* ---------------- Utilities ---------------- */
 function $(id){ return document.getElementById(id); }
 window.$ = $;
 
@@ -408,9 +467,10 @@ function avatarNode(user, size){
   wrap.className = 'avatar-fallback shrink-0';
   wrap.style.width = size+'px'; wrap.style.height = size+'px';
   wrap.style.borderRadius = '9999px';
+  wrap.style.overflow = 'hidden';
   if(user && user.avatarUrl){
     wrap.style.background = 'transparent';
-    wrap.innerHTML = `<img src="${user.avatarUrl}" class="w-full h-full rounded-full object-cover">`;
+    wrap.innerHTML = `<img src="${user.avatarUrl}" class="w-full h-full object-cover">`;
   } else {
     wrap.style.background = colorFor((user&&(user.uid||user.displayName))||'x');
     wrap.style.fontSize = Math.max(12, size*0.36)+'px';
@@ -443,90 +503,176 @@ function clockTime(ts){
   const d = ts.toDate ? ts.toDate() : new Date(ts);
   return d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
 }
+function fullDayTime(ts){
+  if(!ts) return '';
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  const isToday = d.toDateString() === new Date().toDateString();
+  const yest = new Date(); yest.setDate(yest.getDate()-1);
+  const isYest = d.toDateString() === yest.toDateString();
+  const time = d.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+  if(isToday) return 'Today, '+time;
+  if(isYest) return 'Yesterday, '+time;
+  return d.toLocaleDateString()+', '+time;
+}
 function maskPhone(phone){
   if(!phone) return 'Hidden for Privacy';
   const digits = phone.replace(/[^\d]/g,'');
   const last2 = digits.slice(-2);
-  return '+' + digits.slice(0, Math.max(1,digits.length-8)) + ' ***** ***' + last2;
+  const cc = digits.slice(0, Math.max(1,digits.length-10));
+  return '+' + (cc||digits[0]) + ' ***** ***' + last2;
 }
-async function getUserCached(uid){
-  if(userCache[uid]) return userCache[uid];
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+async function getUserCached(uid, force){
+  if(!force && userCache[uid]) return userCache[uid];
   const snap = await getDoc(doc(db,'users',uid));
   if(snap.exists()){ userCache[uid] = {uid, ...snap.data()}; return userCache[uid]; }
   return null;
 }
+async function getDocsSafe(q){ return getDocs(q); }
 
 /* ---------------- Screen navigation ---------------- */
-const screenHistory = [];
 function showScreen(name, param){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const el = $('screen-'+name);
   if(el) el.classList.add('active');
-  screenHistory.push(name);
   if(name === 'profile') openProfile(param);
   if(name === 'newchat') renderContactPicker();
   if(name === 'search'){ $('searchInput').value=''; $('searchResults').innerHTML=''; }
+  if(name !== 'media') stopStoryPlayback();
 }
 window.showScreen = showScreen;
-
 function goAuth(mode){ showScreen('phone'); }
 window.goAuth = goAuth;
 
 /* ---------------- Recaptcha / Phone Auth ---------------- */
-let recaptchaVerifier = null;
 function ensureRecaptcha(){
-  if(recaptchaVerifier) return recaptchaVerifier;
-  recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+  if(window.recaptchaVerifier) return window.recaptchaVerifier;
+  window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
     size: 'invisible',
     callback: () => {}
   });
-  return recaptchaVerifier;
+  return window.recaptchaVerifier;
+}
+function resetRecaptcha(){
+  try{
+    if(window.recaptchaVerifier){ window.recaptchaVerifier.clear(); }
+  }catch(e){}
+  window.recaptchaVerifier = null;
+  $('recaptcha-container').innerHTML = '';
 }
 
 async function sendOtp(isResend){
+  if(isResend && resendSecondsLeft > 0) return;
   const btn = $('sendOtpBtn'), label = $('sendOtpLabel');
-  const cc = $('countryCode').value.trim().replace(/[^0-9]/g,'');
-  const num = $('phoneInput').value.trim().replace(/[^0-9]/g,'');
-  const target = isResend ? pendingE164 : ('+'+cc+num);
-  if(!target || target.length < 8){ toast('Enter a valid phone number'); return; }
+  let target;
+  if(isResend){
+    target = pendingE164;
+  } else {
+    const cc = $('countryCode').value.trim().replace(/[^0-9]/g,'');
+    const num = $('phoneInput').value.trim().replace(/[^0-9]/g,'');
+    if(!cc || num.length < 6){ toast('Enter a valid phone number'); return; }
+    target = '+'+cc+num;
+  }
   pendingE164 = target;
-  label.innerHTML = '<span class="spinner inline-block align-middle"></span>';
+  if(!isResend){ label.innerHTML = '<span class="spinner inline-block align-middle"></span>'; btn.disabled = true; }
   try{
     const verifier = ensureRecaptcha();
     confirmationResult = await signInWithPhoneNumber(auth, target, verifier);
-    label.textContent = 'Send Code';
+    if(!isResend){ label.textContent = 'Send Code'; btn.disabled = false; }
     $('otpSubtext').textContent = `Enter the 6-digit code sent to ${target}.`;
+    clearOtpBoxes();
     showScreen('otp');
-    toast('Code sent');
+    startResendCooldown();
+    toast(isResend ? 'Code resent' : 'Code sent');
   }catch(err){
     console.error(err);
-    label.textContent = 'Send Code';
+    if(!isResend){ label.textContent = 'Send Code'; btn.disabled = false; }
     toast('Could not send code: ' + (err.code || err.message));
+    resetRecaptcha();
   }
 }
 window.sendOtp = sendOtp;
 
-function otpMove(input, idx){
-  input.value = input.value.replace(/[^0-9]/g,'').slice(0,1);
-  const boxes = $('otpBoxes').querySelectorAll('input');
-  if(input.value && idx < boxes.length-1) boxes[idx+1].focus();
-  if(idx === boxes.length-1 && Array.from(boxes).every(b=>b.value)) verifyOtp();
+function startResendCooldown(){
+  resendSecondsLeft = 60;
+  const btn = $('resendBtn');
+  btn.disabled = true;
+  clearInterval(resendTimer);
+  const tick = ()=>{
+    if(resendSecondsLeft <= 0){
+      btn.textContent = 'Resend code';
+      btn.disabled = false;
+      clearInterval(resendTimer);
+      return;
+    }
+    btn.textContent = `Resend code in ${resendSecondsLeft}s`;
+    resendSecondsLeft--;
+  };
+  tick();
+  resendTimer = setInterval(tick, 1000);
 }
-window.otpMove = otpMove;
+
+function clearOtpBoxes(){
+  const boxes = $('otpBoxes').querySelectorAll('input');
+  boxes.forEach(b=>b.value='');
+  boxes[0].focus();
+}
+
+function otpKeyHandler(e){
+  const input = e.target;
+  const boxes = Array.from($('otpBoxes').querySelectorAll('input'));
+  const idx = parseInt(input.dataset.idx,10);
+  if(e.key === 'Backspace'){
+    if(input.value){ input.value=''; }
+    else if(idx > 0){ boxes[idx-1].focus(); boxes[idx-1].value=''; }
+    e.preventDefault();
+  }
+}
+function otpInputHandler(e){
+  const input = e.target;
+  const boxes = Array.from($('otpBoxes').querySelectorAll('input'));
+  const idx = parseInt(input.dataset.idx,10);
+  input.value = input.value.replace(/[^0-9]/g,'').slice(-1);
+  if(input.value && idx < boxes.length-1) boxes[idx+1].focus();
+  if(boxes.every(b=>b.value.length===1)) verifyOtp();
+}
+function otpPasteHandler(e){
+  e.preventDefault();
+  const paste = (e.clipboardData || window.clipboardData).getData('text').replace(/[^0-9]/g,'').slice(0,6);
+  if(!paste) return;
+  const boxes = Array.from($('otpBoxes').querySelectorAll('input'));
+  paste.split('').forEach((d,i)=>{ if(boxes[i]) boxes[i].value = d; });
+  const lastIdx = Math.min(paste.length,6)-1;
+  if(boxes[lastIdx]) boxes[lastIdx].focus();
+  if(paste.length === 6) verifyOtp();
+}
+document.addEventListener('DOMContentLoaded', ()=>{
+  $('otpBoxes').querySelectorAll('input').forEach(inp=>{
+    inp.addEventListener('input', otpInputHandler);
+    inp.addEventListener('keydown', otpKeyHandler);
+    inp.addEventListener('paste', otpPasteHandler);
+  });
+});
 
 async function verifyOtp(){
   if(!confirmationResult){ toast('Request a code first'); return; }
-  const boxes = $('otpBoxes').querySelectorAll('input');
-  const code = Array.from(boxes).map(b=>b.value).join('');
+  const boxes = Array.from($('otpBoxes').querySelectorAll('input'));
+  const code = boxes.map(b=>b.value).join('');
   if(code.length !== 6){ toast('Enter the full 6-digit code'); return; }
+  const btn = $('verifyOtpBtn');
+  const origLabel = btn.textContent;
+  btn.innerHTML = '<span class="spinner inline-block align-middle"></span>';
   try{
     const cred = await confirmationResult.confirm(code);
     currentUser = cred.user;
     window.currentUser = currentUser;
+    clearInterval(resendTimer);
     await postAuthRoute();
   }catch(err){
     console.error(err);
     toast('Invalid code, try again');
+    btn.textContent = origLabel;
+    clearOtpBoxes();
   }
 }
 window.verifyOtp = verifyOtp;
@@ -543,12 +689,41 @@ async function postAuthRoute(){
   }
 }
 
+/* ---------------- Avatar uploads ---------------- */
+let pendingSetupAvatarFile = null;
+async function handleAvatarFile(inputEl, context){
+  const file = inputEl.files[0];
+  if(!file) return;
+  const localUrl = URL.createObjectURL(file);
+  if(context === 'setup'){
+    pendingSetupAvatarFile = file;
+    const preview = $('setupAvatarPreview');
+    preview.innerHTML = `<img src="${localUrl}" class="w-full h-full object-cover rounded-full">`;
+    return;
+  }
+  if(context === 'profile'){
+    if(!currentUser) return;
+    toast('Uploading photo…');
+    try{
+      const path = `avatars/${currentUser.uid}`;
+      const sref = ref(storage, path);
+      await uploadBytes(sref, file);
+      const url = await getDownloadURL(sref);
+      await updateDoc(doc(db,'users',currentUser.uid), { avatarUrl: url });
+      toast('Profile photo updated');
+    }catch(e){ console.error(e); toast('Upload failed'); }
+  }
+}
+window.handleAvatarFile = handleAvatarFile;
+
 /* ---------------- Username setup ---------------- */
 let usernameCheckTimer = null;
 function updateAvatarPreview(){
   const name = $('setupDisplayName').value;
-  $('setupAvatarPreview').textContent = initials(name) || '?';
-  $('setupAvatarPreview').style.background = colorFor(name||'x');
+  if(!pendingSetupAvatarFile){
+    $('setupAvatarPreview').textContent = initials(name) || '?';
+    $('setupAvatarPreview').style.background = colorFor(name||'x');
+  }
   evalFinishEnabled();
 }
 window.updateAvatarPreview = updateAvatarPreview;
@@ -572,15 +747,15 @@ function checkUsernameAvailability(){
         statusEl.textContent = 'taken'; statusEl.className='text-xs text-red-400';
         usernameAvailable = false;
       }
-    }catch(e){ statusEl.textContent=''; }
+    }catch(e){
+      console.error(e);
+      statusEl.textContent = 'check failed'; statusEl.className='text-xs text-red-400';
+      usernameAvailable = false;
+    }
     evalFinishEnabled();
   }, 400);
 }
 window.checkUsernameAvailability = checkUsernameAvailability;
-
-async function getDocsSafe(q){
-  return getDocs(q);
-}
 
 function evalFinishEnabled(){
   const dn = $('setupDisplayName').value.trim();
@@ -592,23 +767,39 @@ async function finishSetup(){
   const displayName = $('setupDisplayName').value.trim();
   const username = $('setupUsername').value.trim();
   if(!displayName || !username || !usernameAvailable) return;
-  const profileData = {
-    uid: currentUser.uid,
-    phone: currentUser.phoneNumber || pendingE164 || '',
-    username, displayName,
-    avatarUrl: '',
-    about: 'Just a boy with big dreams... ✨'.length ? 'Hey there! I am using OnlyChat.' : '',
-    isVerified: false,
-    subscriptionType: 'free',
-    contacts: [],
-    online: true,
-    lastSeen: serverTimestamp()
-  };
-  await setDoc(doc(db,'users',currentUser.uid), profileData);
-  myProfile = { ...profileData };
-  userCache[currentUser.uid] = myProfile;
-  attachMyDocListener();
-  enterApp();
+  $('finishSetupBtn').disabled = true;
+  $('finishSetupBtn').innerHTML = '<span class="spinner inline-block align-middle"></span>';
+  let avatarUrl = '';
+  try{
+    if(pendingSetupAvatarFile){
+      const path = `avatars/${currentUser.uid}`;
+      const sref = ref(storage, path);
+      await uploadBytes(sref, pendingSetupAvatarFile);
+      avatarUrl = await getDownloadURL(sref);
+    }
+    const profileData = {
+      uid: currentUser.uid,
+      phone: currentUser.phoneNumber || pendingE164 || '',
+      username, displayName,
+      avatarUrl,
+      about: 'Hey there! I am using OnlyChat.',
+      isVerified: false,
+      subscriptionType: 'free',
+      contacts: [],
+      online: true,
+      lastSeen: serverTimestamp()
+    };
+    await setDoc(doc(db,'users',currentUser.uid), profileData);
+    myProfile = { ...profileData };
+    userCache[currentUser.uid] = myProfile;
+    attachMyDocListener();
+    enterApp();
+  }catch(e){
+    console.error(e);
+    toast('Setup failed, try again');
+    $('finishSetupBtn').disabled = false;
+    $('finishSetupBtn').textContent = 'Start Chatting';
+  }
 }
 window.finishSetup = finishSetup;
 
@@ -629,6 +820,7 @@ async function enterApp(){
   await updateDoc(doc(db,'users',currentUser.uid), { online:true, lastSeen: serverTimestamp() }).catch(()=>{});
   attachChatListListener();
   attachStatusListener();
+  attachCallsListener();
   loadAllUsersForDiscovery();
   refreshHeaderChrome();
   window.addEventListener('beforeunload', ()=>{
@@ -642,7 +834,7 @@ function refreshHeaderChrome(){
   $('settingsName').textContent = myProfile.displayName || '';
   $('settingsTick').innerHTML = badgeIf(myProfile);
   $('settingsPhone').textContent = myProfile.phone || '';
-  $('verifyToggleBtn').textContent = myProfile.isVerified ? 'Disable' : 'Enable';
+  $('verifyToggleBtn').textContent = myProfile.isVerified ? 'Manage' : 'Enable';
 }
 
 /* ---------------- Home tabs ---------------- */
@@ -651,6 +843,10 @@ function setHomeTab(tab){
   document.querySelectorAll('[data-hometab]').forEach(b=>{
     const active = b.dataset.hometab === tab;
     b.className = 'pb-2 font-semibold ' + (active ? 'text-accent2 border-b-2 border-accent2' : 'text-muted border-b-2 border-transparent');
+  });
+  document.querySelectorAll('[data-navtab]').forEach(b=>{
+    b.classList.toggle('text-accent2', b.dataset.navtab===tab);
+    b.classList.toggle('text-muted', b.dataset.navtab!==tab);
   });
   ['chats','status','calls'].forEach(t=>{
     $('tab-'+t).classList.toggle('hidden', t !== tab);
@@ -669,9 +865,15 @@ function attachChatListListener(){
       const otherUid = (data.participants||[]).find(p=>p!==currentUser.uid);
       const other = otherUid ? await getUserCached(otherUid) : null;
       rows.push({ id:d.id, ...data, other });
+      // Simulate delivery receipt: if the last message was sent by the other participant
+      // and is still marked "sent", flip it to "delivered" now that our client has received it.
+      if(data.lastSenderId && data.lastSenderId !== currentUser.uid && data.lastMessageId && data.lastStatus === 'sent'){
+        updateDoc(doc(db,'chats',d.id,'messages',data.lastMessageId), { status:'delivered' }).catch(()=>{});
+        updateDoc(doc(db,'chats',d.id), { lastStatus:'delivered' }).catch(()=>{});
+      }
     }
     renderChatList(rows);
-  }, (err)=>{ console.error(err); });
+  }, (err)=>{ console.error(err); toast('Could not load chats'); });
 }
 
 function renderChatList(rows){
@@ -688,6 +890,7 @@ function renderChatList(rows){
     const av = avatarNode(other, 48);
     const wrap = document.createElement('div');
     wrap.className='flex-1 min-w-0';
+    const lastText = row.lastMessageType === 'image' ? '📷 Photo' : (row.lastMessage||'Say hello 👋');
     wrap.innerHTML = `
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-1 min-w-0">
@@ -697,14 +900,13 @@ function renderChatList(rows){
         <span class="text-[11px] ${unread>0?'text-accent2 font-semibold':'text-muted'} shrink-0">${clockTime(row.lastTimestamp)}</span>
       </div>
       <div class="flex items-center justify-between mt-0.5">
-        <p class="text-muted text-[13px] truncate max-w-[75%]">${escapeHtml(row.lastMessage||'Say hello 👋')}</p>
+        <p class="text-muted text-[13px] truncate max-w-[75%]">${escapeHtml(lastText)}</p>
         ${unread>0 ? `<span class="bg-accent text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">${unread}</span>` : ''}
       </div>`;
     item.appendChild(av); item.appendChild(wrap);
     list.appendChild(item);
   });
 }
-function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 /* ---------------- Find or create chat ---------------- */
 async function findOrCreateChat(otherUid){
@@ -718,7 +920,7 @@ async function findOrCreateChat(otherUid){
   if(existing) return existing;
   const ref2 = await addDoc(collection(db,'chats'), {
     participants: [currentUser.uid, otherUid],
-    lastMessage: '', lastTimestamp: serverTimestamp(),
+    lastMessage: '', lastMessageType:'text', lastTimestamp: serverTimestamp(), lastSenderId:'', lastMessageId:'', lastStatus:'',
     unreadCount: { [currentUser.uid]:0, [otherUid]:0 }
   });
   return ref2.id;
@@ -733,8 +935,7 @@ async function openChat(chatId, otherUid){
   $('chatHeaderStatus').textContent = other && other.online ? 'Online' : (other && other.lastSeen ? 'last seen ' + timeAgoShort(other.lastSeen) : '');
   showScreen('chat');
   attachMessagesListener(chatId, otherUid);
-  const chatRef = doc(db,'chats',chatId);
-  updateDoc(chatRef, { [`unreadCount.${currentUser.uid}`]: 0 }).catch(()=>{});
+  updateDoc(doc(db,'chats',chatId), { [`unreadCount.${currentUser.uid}`]: 0 }).catch(()=>{});
 }
 window.openChat = openChat;
 
@@ -744,13 +945,13 @@ function attachMessagesListener(chatId, otherUid){
   unsubMessages = onSnapshot(q, (snap)=>{
     const msgs = snap.docs.map(d=>({id:d.id, ...d.data()}));
     renderMessages(msgs);
-    // mark incoming as read
     msgs.forEach(m=>{
       if(m.senderId === otherUid && m.status !== 'read'){
         updateDoc(doc(db,'chats',chatId,'messages',m.id), { status:'read' }).catch(()=>{});
+        updateDoc(doc(db,'chats',chatId), { lastStatus:'read' }).catch(()=>{});
       }
     });
-  });
+  }, (err)=>{ console.error(err); toast('Could not load messages'); });
 }
 
 function renderMessages(msgs){
@@ -771,23 +972,42 @@ function renderMessages(msgs){
     const row = document.createElement('div');
     row.className = 'flex ' + (mine ? 'justify-end' : 'justify-start');
     const bubble = document.createElement('div');
-    bubble.className = 'max-w-[75%] rounded-2xl px-3.5 py-2 ' + (mine ? 'bubble-sent text-white rounded-br-md' : 'bubble-recv text-white rounded-bl-md');
-    bubble.innerHTML = `<p class="text-[14.5px] leading-snug">${escapeHtml(m.text||'')}</p>
-      <div class="flex items-center justify-end gap-1 mt-1">
-        <span class="text-[10px] ${mine?'text-blue-100':'text-muted'}">${clockTime(m.timestamp)}</span>
-        ${mine ? tickIconFor(m.status) : ''}
-      </div>`;
+    bubble.className = 'max-w-[75%] rounded-2xl px-1.5 py-1.5 ' + (mine ? 'bubble-sent rounded-br-md' : 'bubble-recv rounded-bl-md');
+    if(m.mediaUrl){
+      bubble.classList.add('px-1.5','py-1.5');
+      bubble.innerHTML = `<img src="${m.mediaUrl}" onclick="viewChatImage('${m.mediaUrl}')" class="rounded-xl max-w-full max-h-72 object-cover cursor-pointer">
+        ${m.text ? `<p class="text-[14.5px] leading-snug text-white px-1.5 pt-1.5">${escapeHtml(m.text)}</p>` : ''}
+        <div class="flex items-center justify-end gap-1 mt-1 px-1.5 pb-0.5">
+          <span class="text-[10px] ${mine?'text-blue-100':'text-muted'}">${clockTime(m.timestamp)}</span>
+          ${mine ? tickIconFor(m.status) : ''}
+        </div>`;
+    } else {
+      bubble.classList.add('px-3.5','py-2');
+      bubble.innerHTML = `<p class="text-[14.5px] leading-snug text-white">${escapeHtml(m.text||'')}</p>
+        <div class="flex items-center justify-end gap-1 mt-1">
+          <span class="text-[10px] ${mine?'text-blue-100':'text-muted'}">${clockTime(m.timestamp)}</span>
+          ${mine ? tickIconFor(m.status) : ''}
+        </div>`;
+    }
     row.appendChild(bubble);
     list.appendChild(row);
   });
   list.scrollTop = list.scrollHeight;
 }
+window.viewChatImage = (url)=> viewMedia(url);
+
 function tickIconFor(status){
-  const color = status==='read' ? '#93C5FD' : 'rgba(255,255,255,.6)';
-  if(status==='sent'){
-    return `<svg width="14" height="10" viewBox="0 0 16 11" fill="none"><path d="M1 5.5L5.5 10 15 1" stroke="${color}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  // sent: single white check. delivered: double white check. read: double blue check.
+  if(status === 'read'){
+    const color = '#93C5FD';
+    return `<svg width="18" height="10" viewBox="0 0 20 11" fill="none"><path d="M1 5.5L5.5 10 15 1" stroke="${color}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 5.5L10.5 10 20 1" stroke="${color}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
   }
-  return `<svg width="18" height="10" viewBox="0 0 20 11" fill="none"><path d="M1 5.5L5.5 10 15 1" stroke="${color}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 5.5L10.5 10 20 1" stroke="${color}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  if(status === 'delivered'){
+    const color = 'rgba(255,255,255,.75)';
+    return `<svg width="18" height="10" viewBox="0 0 20 11" fill="none"><path d="M1 5.5L5.5 10 15 1" stroke="${color}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 5.5L10.5 10 20 1" stroke="${color}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  }
+  const color = 'rgba(255,255,255,.75)';
+  return `<svg width="14" height="10" viewBox="0 0 16 11" fill="none"><path d="M1 5.5L5.5 10 15 1" stroke="${color}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 }
 
 async function sendMessage(){
@@ -796,15 +1016,39 @@ async function sendMessage(){
   if(!text || !activeChat) return;
   input.value='';
   const { chatId, otherUid } = activeChat;
-  await addDoc(collection(db,'chats',chatId,'messages'), {
+  const msgRef = await addDoc(collection(db,'chats',chatId,'messages'), {
     senderId: currentUser.uid, text, mediaUrl:'', timestamp: serverTimestamp(), status:'sent'
   });
   await updateDoc(doc(db,'chats',chatId), {
-    lastMessage: text, lastTimestamp: serverTimestamp(),
+    lastMessage: text, lastMessageType:'text', lastTimestamp: serverTimestamp(),
+    lastSenderId: currentUser.uid, lastMessageId: msgRef.id, lastStatus: 'sent',
     [`unreadCount.${otherUid}`]: increment(1)
   });
 }
 window.sendMessage = sendMessage;
+
+async function sendImageMessage(inputEl){
+  const file = inputEl.files[0];
+  if(!file || !activeChat) return;
+  const { chatId, otherUid } = activeChat;
+  toast('Uploading image…');
+  try{
+    const path = `chatMedia/${chatId}/${Date.now()}_${file.name}`;
+    const sref = ref(storage, path);
+    await uploadBytes(sref, file);
+    const url = await getDownloadURL(sref);
+    const msgRef = await addDoc(collection(db,'chats',chatId,'messages'), {
+      senderId: currentUser.uid, text:'', mediaUrl:url, timestamp: serverTimestamp(), status:'sent'
+    });
+    await updateDoc(doc(db,'chats',chatId), {
+      lastMessage: '📷 Photo', lastMessageType:'image', lastTimestamp: serverTimestamp(),
+      lastSenderId: currentUser.uid, lastMessageId: msgRef.id, lastStatus: 'sent',
+      [`unreadCount.${otherUid}`]: increment(1)
+    });
+  }catch(e){ console.error(e); toast('Image upload failed'); }
+  inputEl.value = '';
+}
+window.sendImageMessage = sendImageMessage;
 
 function leaveChat(){
   if(unsubMessages){ unsubMessages(); unsubMessages=null; }
@@ -813,17 +1057,22 @@ function leaveChat(){
 }
 window.leaveChat = leaveChat;
 
-/* ---------------- Search screen ---------------- */
+/* ---------------- Search screen (equality query + client-side fallback) ---------------- */
 let searchTimer = null;
 function runSearch(){
   clearTimeout(searchTimer);
   const term = $('searchInput').value.trim().toLowerCase().replace(/^@/,'');
   if(!term){ $('searchResults').innerHTML=''; return; }
   searchTimer = setTimeout(async ()=>{
-    const q = query(collection(db,'users'), orderBy('username'), startAt(term), endAt(term+'\uf8ff'), limit(20));
     let results = [];
-    try{ const snap = await getDocsSafe(q); snap.forEach(d=>{ if(d.id!==currentUser.uid) results.push({uid:d.id, ...d.data()}); }); }
-    catch(e){ console.error(e); }
+    try{
+      const q = query(collection(db,'users'), where('username','>=', term), where('username','<=', term+'\uf8ff'), limit(20));
+      const snap = await getDocsSafe(q);
+      snap.forEach(d=>{ if(d.id!==currentUser.uid) results.push({uid:d.id, ...d.data()}); });
+    }catch(e){
+      console.warn('Range query failed, falling back to client-side filter', e);
+      results = allUsersCache.filter(u => (u.username||'').toLowerCase().includes(term) || (u.displayName||'').toLowerCase().includes(term));
+    }
     renderSearchResults(results);
   }, 300);
 }
@@ -852,7 +1101,7 @@ function renderSearchResults(results){
 /* ---------------- New chat / contact picker ---------------- */
 async function loadAllUsersForDiscovery(){
   try{
-    const snap = await getDocsSafe(query(collection(db,'users'), limit(100)));
+    const snap = await getDocsSafe(query(collection(db,'users'), limit(200)));
     allUsersCache = [];
     snap.forEach(d=>{ if(d.id!==currentUser.uid){ allUsersCache.push({uid:d.id, ...d.data()}); userCache[d.id]={uid:d.id, ...d.data()}; } });
   }catch(e){ console.error(e); }
@@ -905,7 +1154,7 @@ window.startSelectedChat = startSelectedChat;
 let profileTargetUid = null;
 async function openProfile(uid){
   profileTargetUid = uid || currentUser.uid;
-  const user = await getUserCached(profileTargetUid);
+  const user = await getUserCached(profileTargetUid, true);
   if(!user) return;
   $('profileAvatar').innerHTML=''; $('profileAvatar').appendChild(avatarNode(user,112));
   $('profileName').textContent = user.displayName || '';
@@ -914,19 +1163,23 @@ async function openProfile(uid){
   $('profileAbout').textContent = user.about || 'Hey there! I am using OnlyChat.';
 
   const isSelf = profileTargetUid === currentUser.uid;
-  const isMutualContact = isSelf || (myProfile && (myProfile.contacts||[]).includes(profileTargetUid)) || (user.contacts||[]).includes(currentUser.uid);
-  $('profilePhone').textContent = isSelf ? (user.phone||'') : (isMutualContact ? (user.phone || 'Hidden for Privacy') : maskPhone(user.phone));
+  $('profileAvatarEditBtn').classList.toggle('hidden', !isSelf);
+  $('profileAvatarEditBtn').classList.toggle('flex', isSelf);
+
+  const isInMyContacts = myProfile && (myProfile.contacts||[]).includes(profileTargetUid);
+  const isMutual = isSelf || isInMyContacts || (user.contacts||[]).includes(currentUser.uid);
+  $('profilePhone').textContent = isSelf ? (user.phone||'') : (isMutual ? (user.phone || 'Hidden for Privacy') : maskPhone(user.phone));
 
   const actions = $('profileActions');
   actions.innerHTML='';
   if(isSelf){
-    actions.innerHTML = actionBtn('Edit','✎','showScreen(\'settings\')') + actionBtn('Settings','⚙','showScreen(\'settings\')');
+    actions.innerHTML = actionBtn('Edit','✎',"document.getElementById('profileAvatarFile').click()") + actionBtn('Settings','⚙',"showScreen('settings')");
   } else {
     actions.innerHTML =
       actionBtn('Message','💬', `startChatWith('${profileTargetUid}')`) +
-      actionBtn('Call','📞', `toast('Calling…')`) +
-      actionBtn('Video','🎥', `toast('Starting video call…')`) +
-      actionBtn('More','⋯', `addAsContact('${profileTargetUid}')`);
+      actionBtn('Call','📞', `logCallFor('${profileTargetUid}','audio')`) +
+      actionBtn('Video','🎥', `logCallFor('${profileTargetUid}','video')`) +
+      actionBtn(isInMyContacts ? 'Remove':'Add','👤', `toggleContact('${profileTargetUid}', ${isInMyContacts})`);
   }
 }
 function actionBtn(label, icon, onclick){
@@ -941,12 +1194,19 @@ async function startChatWith(uid){
 }
 window.startChatWith = startChatWith;
 
-async function addAsContact(uid){
-  await updateDoc(doc(db,'users',currentUser.uid), { contacts: arrayUnion(uid) });
-  toast('Added to contacts — phone number now visible');
-  openProfile(uid);
+async function toggleContact(uid, currentlyIn){
+  try{
+    if(currentlyIn){
+      await updateDoc(doc(db,'users',currentUser.uid), { contacts: arrayRemove(uid) });
+      toast('Removed from contacts');
+    } else {
+      await updateDoc(doc(db,'users',currentUser.uid), { contacts: arrayUnion(uid) });
+      toast('Added to contacts — phone number now visible');
+    }
+    openProfile(uid);
+  }catch(e){ console.error(e); toast('Could not update contacts'); }
 }
-window.addAsContact = addAsContact;
+window.toggleContact = toggleContact;
 
 function goBackFromProfile(){
   if(activeChat && profileTargetUid === activeChat.otherUid){ showScreen('chat'); return; }
@@ -954,14 +1214,34 @@ function goBackFromProfile(){
 }
 window.goBackFromProfile = goBackFromProfile;
 
-/* ---------------- Settings ---------------- */
-async function toggleVerified(){
-  if(!myProfile) return;
-  const next = !myProfile.isVerified;
-  await updateDoc(doc(db,'users',currentUser.uid), { isVerified: next });
-  toast(next ? 'Blue tick enabled ✓' : 'Blue tick disabled');
+/* ---------------- Settings / Verification sheet ---------------- */
+function openVerifySheet(){
+  const isVerified = myProfile && myProfile.isVerified;
+  $('removeVerifyBtn').classList.toggle('hidden', !isVerified);
+  $('simulatePayBtn').textContent = isVerified ? 'Change Plan' : 'Simulate Payment & Activate';
+  $('verifySheetBackdrop').classList.add('active');
 }
-window.toggleVerified = toggleVerified;
+window.openVerifySheet = openVerifySheet;
+function closeVerifySheet(){ $('verifySheetBackdrop').classList.remove('active'); }
+window.closeVerifySheet = closeVerifySheet;
+function selectPlan(el, plan){
+  document.querySelectorAll('.plan-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedPlan = plan;
+}
+window.selectPlan = selectPlan;
+async function activateVerification(){
+  await updateDoc(doc(db,'users',currentUser.uid), { isVerified: true, subscriptionType: selectedPlan });
+  toast('Blue tick activated ✓');
+  closeVerifySheet();
+}
+window.activateVerification = activateVerification;
+async function deactivateVerification(){
+  await updateDoc(doc(db,'users',currentUser.uid), { isVerified: false, subscriptionType: 'free' });
+  toast('Subscription cancelled');
+  closeVerifySheet();
+}
+window.deactivateVerification = deactivateVerification;
 
 async function doLogout(){
   try{
@@ -970,6 +1250,7 @@ async function doLogout(){
     if(unsubMessages) unsubMessages();
     if(unsubStatus) unsubStatus();
     if(unsubMyDoc) unsubMyDoc();
+    if(unsubCalls) unsubCalls();
     await signOut(auth);
   }catch(e){ console.error(e); }
   currentUser = null; myProfile = null; activeChat = null;
@@ -977,27 +1258,34 @@ async function doLogout(){
 }
 window.doLogout = doLogout;
 
-/* ---------------- Status screen ---------------- */
+/* ---------------- Status screen (index-safe query) ---------------- */
 function attachStatusListener(){
   if(unsubStatus) unsubStatus();
-  const cutoff = Timestamp.fromMillis(Date.now() - 24*60*60*1000);
-  const q = query(collection(db,'statusUpdates'), where('timestamp','>', cutoff), orderBy('timestamp','desc'));
+  // Avoid composite-index requirement: only orderBy, then filter the 24h cutoff client-side.
+  const q = query(collection(db,'statusUpdates'), orderBy('timestamp','desc'), limit(200));
   unsubStatus = onSnapshot(q, async (snap)=>{
+    const cutoffMs = Date.now() - 24*60*60*1000;
     const rows = [];
     for(const d of snap.docs){
       const data = d.data();
+      const ts = data.timestamp && data.timestamp.toDate ? data.timestamp.toDate().getTime() : 0;
+      if(ts < cutoffMs) continue;
       const user = await getUserCached(data.userId);
       rows.push({id:d.id, ...data, user});
     }
     renderStatusTab(rows);
-  }, ()=>{ renderStatusTab([]); });
+  }, (err)=>{ console.error(err); renderStatusTab([]); });
 }
 
 function renderStatusTab(rows){
   const host = $('tab-status');
   host.innerHTML='';
   const mine = rows.filter(r=>r.userId===currentUser.uid);
-  const others = rows.filter(r=>r.userId!==currentUser.uid);
+  const othersMap = {};
+  rows.filter(r=>r.userId!==currentUser.uid).forEach(r=>{
+    if(!othersMap[r.userId]) othersMap[r.userId] = [];
+    othersMap[r.userId].push(r);
+  });
 
   const myCard = document.createElement('div');
   myCard.className='flex items-center gap-3 px-4 py-3.5 active:bg-white/5';
@@ -1010,27 +1298,29 @@ function renderStatusTab(rows){
       <p class="text-white font-medium text-[14px]">My Status</p>
       <p class="text-muted text-[12.5px]">${mine.length? mine.length+' update'+(mine.length>1?'s':'') : 'Tap to add status update'}</p>
     </div>`;
-  myCard.onclick = ()=> uploadStatus();
+  myCard.onclick = ()=> mine.length ? openStoryViewer([{user:myProfile, stories:mine.slice().reverse()}], 0) : uploadStatus();
   host.appendChild(myCard);
   myCard.querySelector('#myStatusAvatar').appendChild(avatarNode(myProfile,48));
 
-  if(others.length){
+  const groups = Object.keys(othersMap).map(uid => ({ user: othersMap[uid][0].user, stories: othersMap[uid].slice().reverse() }));
+
+  if(groups.length){
     const label = document.createElement('p');
     label.className='text-muted text-xs font-semibold px-4 pt-3 pb-1';
     label.textContent = 'Recent updates';
     host.appendChild(label);
-    others.forEach(r=>{
+    groups.forEach((g, gi)=>{
       const row = document.createElement('button');
       row.className='w-full flex items-center gap-3 px-4 py-3 active:bg-white/5 text-left';
-      row.onclick = ()=> viewMedia(r.mediaUrl);
+      row.onclick = ()=> openStoryViewer(groups, gi);
       const ring = document.createElement('div');
       ring.className='w-12 h-12 rounded-full status-ring p-[2px] shrink-0';
       const inner = document.createElement('div');
       inner.className='w-full h-full rounded-full bg-bg p-[2px]';
-      inner.appendChild(avatarNode(r.user,42));
+      inner.appendChild(avatarNode(g.user,42));
       ring.appendChild(inner);
       const info = document.createElement('div');
-      info.innerHTML = `<div class="flex items-center gap-1"><span class="text-white font-medium text-[14px]">${escapeHtml(r.user?r.user.displayName:'Unknown')}</span>${badgeIf(r.user)}</div><p class="text-muted text-[12.5px]">${timeAgoShort(r.timestamp)}</p>`;
+      info.innerHTML = `<div class="flex items-center gap-1"><span class="text-white font-medium text-[14px]">${escapeHtml(g.user?g.user.displayName:'Unknown')}</span>${badgeIf(g.user)}</div><p class="text-muted text-[12.5px]">${timeAgoShort(g.stories[0].timestamp)} &middot; ${g.stories.length} update${g.stories.length>1?'s':''}</p>`;
       row.appendChild(ring); row.appendChild(info);
       host.appendChild(row);
     });
@@ -1057,15 +1347,142 @@ async function uploadStatus(){
 }
 window.uploadStatus = uploadStatus;
 
-/* ---------------- Media viewer ---------------- */
+/* ---------------- Story viewer with 5s auto-advance ---------------- */
+function openStoryViewer(groups, groupIdx){
+  storyGroups = groups; storyGroupIdx = groupIdx; storyIdx = 0;
+  $('storyProgressWrap').classList.remove('hidden');
+  $('storyHeader').classList.remove('hidden'); $('storyHeader').classList.add('flex');
+  showScreen('media');
+  renderStoryFrame();
+}
+window.openStoryViewer = openStoryViewer;
+
+function renderStoryFrame(){
+  const group = storyGroups[storyGroupIdx];
+  if(!group){ closeMedia(); return; }
+  const story = group.stories[storyIdx];
+  if(!story){ advanceStoryGroup(); return; }
+  $('mediaViewerImg').src = story.mediaUrl;
+  $('storyAvatar').innerHTML=''; $('storyAvatar').appendChild(avatarNode(group.user,36));
+  $('storyName').textContent = group.user ? group.user.displayName : 'Unknown';
+  $('storyTick').innerHTML = badgeIf(group.user);
+  $('storyTime').textContent = timeAgoShort(story.timestamp);
+  buildProgressBars(group.stories.length, storyIdx);
+  startStoryTimer();
+}
+
+function buildProgressBars(count, activeIdx){
+  const wrap = $('storyProgressWrap');
+  wrap.innerHTML='';
+  for(let i=0;i<count;i++){
+    const track = document.createElement('div');
+    track.className = 'story-progress-track';
+    const fill = document.createElement('div');
+    fill.className = 'story-progress-fill';
+    fill.id = 'storyFill'+i;
+    fill.style.width = i < activeIdx ? '100%' : '0%';
+    track.appendChild(fill);
+    wrap.appendChild(track);
+  }
+}
+
+function startStoryTimer(){
+  stopStoryPlayback();
+  const fill = $('storyFill'+storyIdx);
+  if(!fill) return;
+  storyRafStart = performance.now();
+  const duration = 5000;
+  function step(now){
+    const elapsed = now - storyRafStart;
+    const pct = Math.min(100, (elapsed/duration)*100);
+    fill.style.width = pct+'%';
+    if(pct >= 100){ nextStory(); return; }
+    storyTimer = requestAnimationFrame(step);
+  }
+  storyTimer = requestAnimationFrame(step);
+}
+function stopStoryPlayback(){
+  if(storyTimer){ cancelAnimationFrame(storyTimer); storyTimer=null; }
+}
+function nextStory(){
+  const group = storyGroups[storyGroupIdx];
+  if(storyIdx < group.stories.length - 1){ storyIdx++; renderStoryFrame(); }
+  else { advanceStoryGroup(); }
+}
+function advanceStoryGroup(){
+  if(storyGroupIdx < storyGroups.length - 1){ storyGroupIdx++; storyIdx=0; renderStoryFrame(); }
+  else { closeMedia(); setHomeTab('status'); }
+}
+
+/* ---------------- Plain media viewer (chat images) ---------------- */
 function viewMedia(url){
   if(!url) return;
+  $('storyProgressWrap').classList.add('hidden');
+  $('storyHeader').classList.add('hidden'); $('storyHeader').classList.remove('flex');
   $('mediaViewerImg').src = url;
   showScreen('media');
 }
 window.viewMedia = viewMedia;
-function closeMedia(){ showScreen('home'); setHomeTab('status'); }
+function closeMedia(){
+  stopStoryPlayback();
+  showScreen('home');
+}
 window.closeMedia = closeMedia;
+
+/* ---------------- Calls tab ---------------- */
+async function logCall(type){
+  if(!activeChat) return;
+  return logCallFor(activeChat.otherUid, type);
+}
+window.logCall = logCall;
+
+async function logCallFor(otherUid, type){
+  toast(type === 'video' ? 'Starting video call…' : 'Calling…');
+  try{
+    await addDoc(collection(db,'calls'), {
+      callerId: currentUser.uid, calleeId: otherUid, type,
+      participants: [currentUser.uid, otherUid],
+      timestamp: serverTimestamp()
+    });
+  }catch(e){ console.error(e); }
+}
+window.logCallFor = logCallFor;
+
+function attachCallsListener(){
+  if(unsubCalls) unsubCalls();
+  const q = query(collection(db,'calls'), where('participants','array-contains', currentUser.uid), orderBy('timestamp','desc'), limit(100));
+  unsubCalls = onSnapshot(q, async (snap)=>{
+    const rows = [];
+    for(const d of snap.docs){
+      const data = d.data();
+      const otherUid = data.callerId === currentUser.uid ? data.calleeId : data.callerId;
+      const other = await getUserCached(otherUid);
+      rows.push({ id:d.id, ...data, other, outgoing: data.callerId === currentUser.uid });
+    }
+    renderCallsTab(rows);
+  }, (err)=>{ console.error(err); renderCallsTab([]); });
+}
+
+function renderCallsTab(rows){
+  const list = $('callsList');
+  $('callsEmpty').classList.toggle('hidden', rows.length>0);
+  $('callsEmpty').classList.toggle('flex', rows.length===0);
+  list.innerHTML='';
+  rows.forEach(r=>{
+    const other = r.other || {displayName:'Unknown'};
+    const item = document.createElement('div');
+    item.className='w-full flex items-center gap-3 px-4 py-3';
+    const av = avatarNode(other,46);
+    const dirLabel = r.outgoing ? 'Outgoing' : 'Incoming';
+    const icon = r.type === 'video' ? '🎥' : '📞';
+    const info = document.createElement('div');
+    info.className='flex-1 min-w-0';
+    info.innerHTML = `<div class="flex items-center gap-1"><span class="text-white font-medium text-[14px] truncate">${escapeHtml(other.displayName)}</span>${badgeIf(other)}</div>
+      <p class="text-muted text-[12.5px]">${icon} ${dirLabel} Call &middot; ${fullDayTime(r.timestamp)}</p>`;
+    item.appendChild(av); item.appendChild(info);
+    list.appendChild(item);
+  });
+}
 
 /* ---------------- Auth state bootstrap ---------------- */
 onAuthStateChanged(auth, async (user)=>{
